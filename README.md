@@ -1,13 +1,13 @@
-# [STUDENT INPUT: Project Title]
+# AI-Assisted Job Aggregator Mobile Application
 
 Bachelor of Computer Science — Individual Capstone
 
 | | |
 |---|---|
-| Student | [STUDENT INPUT: name and student ID] |
-| Advisor | [STUDENT INPUT] |
-| Term | [STUDENT INPUT] |
-| Pitch | [STUDENT INPUT: one sentence: who has the problem, and what your app does about it] |
+| Student | RETH CHAN RITH — E2 |
+| Advisor | Sopheak |
+| Term | Year 4, Semester 1 — 2026 |
+| Pitch | Cambodian job seekers struggle to find and compare vacancies across multiple platforms, so this app aggregates listings from multiple sources, normalizes the data, and uses AI to match each job to the user's skill profile. |
 
 First time here? Read the guide: [template/README.md](template/README.md)
 
@@ -17,14 +17,14 @@ Update this section whenever you work on a phase. Your advisor reads it to follo
 
 | | |
 |---|---|
-| Now working on | [STUDENT INPUT: phase and task] |
-| Blockers | [STUDENT INPUT: or "None"] |
-| Last updated | [STUDENT INPUT: YYYY-MM-DD] |
+| Now working on | Phase 2 — Scope, Logic & MoSCoW |
+| Blockers | None |
+| Last updated | 2026-10-15 |
 
 | Phase | Planned due | Status | Submitted on |
 |---|---|---|---|
-| 1. Domain & Problem Teardown | | Not started | |
-| 2. Scope, Logic & MoSCoW | | Not started | |
+| 1. Domain & Problem Teardown | 2026-10-17 | Submitted | 2026-10-15 |
+| 2. Scope, Logic & MoSCoW | 2026-10-17 | Submitted | 2026-10-15 |
 | 3. Architecture, ERD & API Planning | | Not started | |
 | 4. UI/UX & Figma Design | | Not started | |
 | 5. Backend Core & API Implementation | | Not started | |
@@ -38,7 +38,7 @@ Status values: Not started · In progress · Submitted · Rework needed
 
 | Item | Link |
 |---|---|
-| Figma file | [STUDENT INPUT] |
+| Figma file | TBD (Phase 4) |
 | Figma prototype | |
 | Alpha demo video | |
 | Thesis | |
@@ -46,7 +46,7 @@ Status values: Not started · In progress · Submitted · Rework needed
 
 ## How to Run
 
-[STUDENT INPUT: From Phase 5 onward, list the commands to start the database, run migrations and seeds, start the API on port 8000, run the API tests, and start the client.]
+_From Phase 5 onward, commands will be listed here to start the database, run migrations and seeds, start the API on port 8000, run the API tests, and start the mobile client._
 
 ## Repository Layout
 
@@ -55,6 +55,6 @@ Status values: Not started · In progress · Submitted · Rework needed
 | `template/` | Guide and phase templates from the advisor (do not edit) |
 | `context/` | My completed phase documents and evidence |
 | `backend/` | Backend code |
-| `mobile/` | Client app code |
+| `mobile/` | Flutter mobile app code |
 | `api-specs/` | API test collection |
 | `AGENTS.md` | Instructions for AI coding assistants |
