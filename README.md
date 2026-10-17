@@ -17,15 +17,15 @@ Update this section whenever you work on a phase. Your advisor reads it to follo
 
 | | |
 |---|---|
-| Now working on | Phase 2 — Scope, Logic & MoSCoW |
+| Now working on | Phase 4 — UI/UX & Figma Design |
 | Blockers | None |
-| Last updated | 2026-10-15 |
+| Last updated | 2026-10-18 |
 
 | Phase | Planned due | Status | Submitted on |
 |---|---|---|---|
 | 1. Domain & Problem Teardown | 2026-10-17 | Submitted | 2026-10-15 |
 | 2. Scope, Logic & MoSCoW | 2026-10-17 | Submitted | 2026-10-15 |
-| 3. Architecture, ERD & API Planning | | Not started | |
+| 3. Architecture, ERD & API Planning | 2026-10-24 | Submitted | 2026-10-18 |
 | 4. UI/UX & Figma Design | | Not started | |
 | 5. Backend Core & API Implementation | | Not started | |
 | 6. Frontend Client & Integration | | Not started | |
