@@ -23,26 +23,26 @@
 
 ```mermaid
 erDiagram
-    users ||--|| profiles : "has one (1:1)"
-    users ||--o{ saved_jobs : "bookmarks (1:N)"
-    profiles ||--o{ profile_skills : "possesses (1:N)"
-    skills ||--o{ profile_skills : "referenced in (1:N)"
-    skills ||--o{ job_skills : "required in (1:N)"
-    job_listings ||--o{ job_skills : "requires (1:N)"
-    job_listings ||--o{ saved_jobs : "saved by (1:N)"
+    users ||--|| profiles : has
+    users ||--o{ saved_jobs : bookmarks
+    profiles ||--o{ profile_skills : possesses
+    skills ||--o{ profile_skills : referenced_in
+    skills ||--o{ job_skills : required_in
+    job_listings ||--o{ job_skills : requires
+    job_listings ||--o{ saved_jobs : saved_by
 
     users {
         int id PK
         string email UK
         string password_hash
-        string role "user | admin"
+        string role
         timestamp created_at
         timestamp updated_at
     }
 
     profiles {
         int id PK
-        int user_id FK,UK
+        int user_id FK
         string full_name
         string education
         string experience_level
@@ -55,8 +55,8 @@ erDiagram
 
     skills {
         int id PK
-        string name UK "e.g. Flutter, Dart, SQL"
-        string category "e.g. Mobile, Backend"
+        string name UK
+        string category
         timestamp created_at
         timestamp updated_at
     }
@@ -74,14 +74,14 @@ erDiagram
         string title
         string company
         string location
-        string experience_level "junior | mid | senior"
-        string job_type "full-time | internship"
+        string experience_level
+        string job_type
         numeric salary_min
         numeric salary_max
-        string salary_currency "USD"
+        string salary_currency
         boolean is_negotiable
         text description
-        string source "Telegram | CamHR"
+        string source
         string source_url UK
         date posted_at
         date deadline

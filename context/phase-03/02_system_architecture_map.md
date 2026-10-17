@@ -14,45 +14,40 @@
 ## 1. High-Level Component Map
 
 ```mermaid
-graph LR
-    subgraph Users ["Users"]
-        User["👤 Job Seeker<br>(Dara)"]
+flowchart LR
+    subgraph Users [Users]
+        User[Job Seeker - Dara]
     end
 
-    subgraph Client ["Client Layer"]
-        App["📱 Flutter Mobile App<br>(Android Client)"]
+    subgraph Client [Client Layer]
+        App[Flutter Mobile App - Android]
     end
 
-    subgraph Server ["Backend & Processing Layer"]
-        API["⚙️ Backend API<br>(FastAPI - Port 8000)"]
-        AI["🧠 AI Matching Engine<br>(Cosine Similarity)"]
-        Scraper["🕷️ Scraper & Data Pipeline<br>(Python BeautifulSoup & Telethon)"]
+    subgraph Server [Backend and Processing Layer]
+        API[Backend API - FastAPI Port 8000]
+        AI[AI Matching Engine]
+        Scraper[Scraper and Data Pipeline]
     end
 
-    subgraph Storage ["Database Layer"]
-        DB[("🗄️ PostgreSQL Database<br>Jobs, Profiles, Skills")]
+    subgraph Storage [Database Layer]
+        DB[(PostgreSQL Database)]
     end
 
-    subgraph External ["External Services"]
-        WebJobs["🌐 Web Job Boards<br>(CamHR, BongThom)"]
-        Telegram["📢 Telegram Channel<br>(@internshipscambodia)"]
+    subgraph External [External Services]
+        WebJobs[Web Job Boards - CamHR]
+        Telegram[Telegram Channel - @internshipscambodia]
     end
 
-    User -->|Opens App & Views Feed| App
-    App <-->|HTTPS / JSON| API
-    API <-->|SQL Queries| DB
-    API <-->|Computes Match %| AI
+    User --> App
+    App -->|HTTPS / JSON| API
+    API -->|HTTPS / JSON| App
+    API -->|SQL Queries| DB
+    DB -->|Results| API
+    API -->|Match Request| AI
+    AI -->|Match Score| API
     Scraper -->|Saves Clean Jobs| DB
     Scraper -.->|HTML Scraping| WebJobs
     Scraper -.->|Telegram API| Telegram
-
-    style App fill:#d0e8ff,stroke:#2b7fff,stroke-width:2px;
-    style API fill:#e8d8ff,stroke:#8a4fff,stroke-width:2px;
-    style AI fill:#e8d8ff,stroke:#8a4fff,stroke-width:2px;
-    style Scraper fill:#e8d8ff,stroke:#8a4fff,stroke-width:2px;
-    style DB fill:#fff0c2,stroke:#d99b00,stroke-width:2px;
-    style WebJobs fill:#f5f5f5,stroke:#999,stroke-width:1.5px,stroke-dasharray: 5 5;
-    style Telegram fill:#f5f5f5,stroke:#999,stroke-width:1.5px,stroke-dasharray: 5 5;
 ```
 
 ![System Architecture](../assets/system_architecture_diagram.jpg)
