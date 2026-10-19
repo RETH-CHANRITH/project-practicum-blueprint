@@ -17,17 +17,17 @@ Update this section whenever you work on a phase. Your advisor reads it to follo
 
 | | |
 |---|---|
-| Now working on | Phase 4 — UI/UX & Figma Design |
+| Now working on | Phase 6 — Frontend Client & Integration |
 | Blockers | None |
-| Last updated | 2026-10-18 |
+| Last updated | 2026-10-19 |
 
 | Phase | Planned due | Status | Submitted on |
 |---|---|---|---|
 | 1. Domain & Problem Teardown | 2026-10-17 | Submitted | 2026-10-15 |
 | 2. Scope, Logic & MoSCoW | 2026-10-17 | Submitted | 2026-10-15 |
 | 3. Architecture, ERD & API Planning | 2026-10-24 | Submitted | 2026-10-18 |
-| 4. UI/UX & Figma Design | | Not started | |
-| 5. Backend Core & API Implementation | | Not started | |
+| 4. UI/UX & Figma Design | 2026-10-24 | Submitted | 2026-10-19 |
+| 5. Backend Core & API Implementation | 2026-10-24 | Submitted | 2026-10-19 |
 | 6. Frontend Client & Integration | | Not started | |
 | 7. QA, Bug Fixes & Test Report | | Not started | |
 | 8. Code Freeze, Final Report & Defense | | Not started | |
@@ -38,8 +38,8 @@ Status values: Not started · In progress · Submitted · Rework needed
 
 | Item | Link |
 |---|---|
-| Figma file | TBD (Phase 4) |
-| Figma prototype | |
+| Figma file | [Figma Design Canvas](https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1) |
+| Figma prototype | [Figma Interactive Prototype](https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1) |
 | Alpha demo video | |
 | Thesis | |
 | Defense slides | |
