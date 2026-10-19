@@ -8,14 +8,15 @@
 # Environment & secrets — NEVER commit real credentials
 # -----------------------------------------------------------------------------
 .env
-.env.local
-.env.*.local
-.env.development
-.env.production
-.env.test
-# ...but DO commit the templates
+.env.*
+**/.env
+**/.env.*
+*.env
+*.env.*
+# Allow templates to be committed
 !.env.example
 !**/.env.example
+
 
 *.pem
 *.key
@@ -179,6 +180,8 @@ figma-cache/
 *.sqlite3
 *.dump
 *.bak
+*.sql
+*.sql.gz
 pgdata/
 mysql-data/
 mongo-data/
