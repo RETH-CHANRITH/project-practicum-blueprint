@@ -38,8 +38,8 @@ Status values: Not started · In progress · Submitted · Rework needed
 
 | Item | Link |
 |---|---|
-| Figma file | [Figma Design Canvas](https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1) |
-| Figma prototype | [Figma Interactive Prototype](https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1) |
+| Figma file | [Figma Design Canvas](https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1) |
+| Figma prototype | [Figma Interactive Prototype](https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1) |
 | Alpha demo video | |
 | Thesis | |
 | Defense slides | |

@@ -6,8 +6,8 @@
 
 | Item | Value |
 |---|---|
-| Figma view-only project URL | `https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1` |
-| Figma interactive prototype URL | `https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/testing?node-id=12-5&t=qkn1T7yKnyHH1rEk-1` |
+| Figma view-only project URL | `https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1` |
+| Figma interactive prototype URL | `https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1` |
 | Target frame resolution | Mobile 393×852 (iPhone 15 / Standard Modern Android) |
 
 Set both links to "Anyone with the link can view" and test them in a private browser window.
