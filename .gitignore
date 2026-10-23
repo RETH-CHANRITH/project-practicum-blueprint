@@ -63,8 +63,11 @@ pnpm-debug.log*
 __pycache__/
 *.py[cod]
 *$py.class
+.venv
 .venv/
+venv
 venv/
+env
 env/
 *.egg-info/
 .eggs/
