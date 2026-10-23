@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     SCRAPER_INTERVAL_MINUTES: int = 60
     AUTO_SCRAPER_ENABLED: bool = True
 
+    # Email & OTP Settings
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_ENABLED: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

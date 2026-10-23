@@ -45,6 +45,31 @@ class LoginResponse(BaseModel):
 
 
 # ---------------------------------------------------------
+# OTP Schemas (EP-14, EP-15)
+# ---------------------------------------------------------
+class OTPSendRequest(BaseModel):
+    email: EmailStr
+    purpose: str = Field(default="login_or_verify", description="Purpose: register, login, reset, or login_or_verify")
+
+class OTPSendResponse(BaseModel):
+    message: str
+    email: str
+    expires_in_seconds: int
+    dev_code: Optional[str] = None
+
+class OTPVerifyRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(..., min_length=6, max_length=6, description="6-digit verification code")
+    purpose: str = Field(default="login_or_verify")
+
+class OTPVerifyResponse(BaseModel):
+    message: str
+    access_token: Optional[str] = None
+    token_type: str = "bearer"
+    user: Optional[UserResponse] = None
+
+
+# ---------------------------------------------------------
 # Profile & Skills Schemas (EP-04, EP-05)
 # ---------------------------------------------------------
 class ProfileBase(BaseModel):
@@ -92,7 +117,16 @@ class JobItemResponse(BaseModel):
     salary_min: Optional[float] = None
     salary_max: Optional[float] = None
     salary_currency: str = "USD"
+    salary_period: Optional[str] = "monthly"  # monthly | yearly | hourly | daily
     is_negotiable: bool = False
+    # --- New fields (teacher recommendation) ---
+    work_arrangement: Optional[str] = None    # on-site | hybrid | remote
+    status: str = "active"                    # active | expired | closed
+    application_url: Optional[str] = None     # direct apply link
+    company_url: Optional[str] = None         # company website
+    scraped_at: Optional[datetime] = None     # when scraper last collected this
+    dedup_hash: Optional[str] = None          # MD5 fingerprint
+    # -------------------------------------------
     source: str
     source_url: str
     posted_at: Optional[str] = None

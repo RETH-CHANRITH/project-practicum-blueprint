@@ -76,12 +76,19 @@ class JobListing(Base):
     salary_min = Column(Numeric(10, 2), nullable=True)
     salary_max = Column(Numeric(10, 2), nullable=True)
     salary_currency = Column(String(10), default="USD", nullable=False)
+    salary_period = Column(String(20), default="monthly", nullable=True)  # monthly | yearly | hourly | daily
     is_negotiable = Column(Boolean, default=False, nullable=False)
     description = Column(Text, nullable=False)
     source = Column(String(50), nullable=False)
     source_url = Column(Text, unique=True, nullable=False)
+    company_url = Column(Text, nullable=True)                       # company website link
     posted_at = Column(Date, nullable=True)
     deadline = Column(Date, nullable=True)
+    work_arrangement = Column(String(50), nullable=True)            # on-site | hybrid | remote
+    scraped_at = Column(DateTime(timezone=True), nullable=True)     # when the scraper last collected this
+    status = Column(String(20), default="active", nullable=False)   # active | expired | closed
+    application_url = Column(Text, nullable=True)                   # direct apply link (if different from source_url)
+    dedup_hash = Column(String(64), nullable=True, index=True)      # MD5 fingerprint for duplicate detection
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -114,3 +121,15 @@ class SavedJob(Base):
 
     user = relationship("User", back_populates="saved_jobs")
     job = relationship("JobListing", back_populates="saved_by")
+
+
+class EmailOTP(Base):
+    __tablename__ = "email_otps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    code = Column(String(6), nullable=False)
+    purpose = Column(String(50), default="login_or_verify", nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    is_used = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

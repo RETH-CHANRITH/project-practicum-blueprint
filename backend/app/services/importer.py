@@ -17,11 +17,12 @@ Features:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
@@ -270,6 +271,55 @@ def import_jobs_from_records(
                 title=clean_title
             )
 
+            # Work arrangement (on-site | hybrid | remote)
+            work_arr_raw = (
+                item.get("work_arrangement")
+                or item.get("work_type")
+                or item.get("remote")
+            )
+            work_arrangement = None
+            if work_arr_raw:
+                wa = str(work_arr_raw).lower().strip()
+                if "remote" in wa:
+                    work_arrangement = "remote"
+                elif "hybrid" in wa:
+                    work_arrangement = "hybrid"
+                elif "on-site" in wa or "onsite" in wa or "office" in wa:
+                    work_arrangement = "on-site"
+                else:
+                    work_arrangement = str(work_arr_raw)[:50]
+
+            # Application URL (direct apply link, may differ from source_url)
+            application_url = str(item.get("application_url") or "").strip() or None
+
+            # Company URL (company website)
+            company_url = str(item.get("company_url") or item.get("company_website") or "").strip() or None
+
+            # Salary period (monthly | yearly | hourly | daily)
+            salary_period_raw = (
+                item.get("salary_period")
+                or item.get("pay_period")
+                or (salary_data.get("period") if isinstance(salary_data, dict) else None)
+            )
+            salary_period = "monthly"  # safe default
+            if salary_period_raw:
+                sp = str(salary_period_raw).lower()
+                if "year" in sp or "annual" in sp:
+                    salary_period = "yearly"
+                elif "hour" in sp:
+                    salary_period = "hourly"
+                elif "day" in sp or "daily" in sp:
+                    salary_period = "daily"
+                else:
+                    salary_period = "monthly"
+
+            # Dedup hash — MD5 fingerprint of title + company + source_url
+            dedup_raw = f"{clean_title.lower()}|{company.lower()}|{clean_url}"
+            dedup_hash = hashlib.md5(dedup_raw.encode("utf-8")).hexdigest()
+
+            # Scraped timestamp
+            now_utc = datetime.now(timezone.utc)
+
             # Source name
             source_name = normalize_source_name(item.get("source") or source_label, clean_url)
 
@@ -301,7 +351,17 @@ def import_jobs_from_records(
                 if deadline_date:
                     existing.deadline = deadline_date
                 existing.is_active = True
-                
+                existing.status = "active"
+                existing.scraped_at = now_utc
+                existing.dedup_hash = dedup_hash
+                existing.salary_period = salary_period
+                if work_arrangement:
+                    existing.work_arrangement = work_arrangement
+                if application_url:
+                    existing.application_url = application_url
+                if company_url:
+                    existing.company_url = company_url
+
                 # Refresh linked skills
                 db.query(JobSkill).filter(JobSkill.job_id == existing.id).delete()
                 extract_and_link_skills(db, existing.id, f"{clean_title} {full_description}", catalog_skills)
@@ -317,12 +377,19 @@ def import_jobs_from_records(
                     salary_min=salary_min,
                     salary_max=salary_max,
                     salary_currency=salary_currency,
+                    salary_period=salary_period,
                     is_negotiable=is_negotiable,
                     description=full_description,
                     source=source_name,
                     source_url=clean_url,
+                    company_url=company_url,
                     posted_at=posted_date,
                     deadline=deadline_date,
+                    work_arrangement=work_arrangement,
+                    application_url=application_url,
+                    scraped_at=now_utc,
+                    status="active",
+                    dedup_hash=dedup_hash,
                     is_active=True
                 )
                 db.add(new_job)

@@ -1,6 +1,7 @@
 import urllib.request
 import re
-from datetime import datetime
+import hashlib
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 from app.models.models import JobListing, Skill, JobSkill
@@ -79,19 +80,42 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
             except Exception:
                 posted_date = datetime.utcnow().date()
 
+        # Determine work arrangement from text
+        text_lower = text.lower()
+        if "remote" in text_lower:
+            work_arrangement = "remote"
+        elif "hybrid" in text_lower:
+            work_arrangement = "hybrid"
+        else:
+            work_arrangement = "on-site"
+
+        # Extract external application URL if present in text
+        urls_in_text = re.findall(r'https?://[^\s<>"]+', text)
+        application_url = urls_in_text[0] if urls_in_text else post_url
+
+        # Compute dedup hash
+        dedup_raw = f"{title.lower()}|{company.lower()}|{post_url}"
+        dedup_hash = hashlib.md5(dedup_raw.encode("utf-8")).hexdigest()
+
         # Create new JobListing in PostgreSQL
         job = JobListing(
             title=title,
             company=company,
             location="Phnom Penh",
             experience_level="entry",
-            job_type="internship" if "intern" in text.lower() else "full-time",
+            job_type="internship" if "intern" in text_lower else "full-time",
             salary_currency="USD",
+            salary_period="monthly",
             is_negotiable=True,
             description=text,
             source="Telegram",
             source_url=post_url,
+            application_url=application_url,
+            work_arrangement=work_arrangement,
+            dedup_hash=dedup_hash,
             posted_at=posted_date,
+            scraped_at=datetime.now(timezone.utc),
+            status="active",
             is_active=True
         )
         db.add(job)

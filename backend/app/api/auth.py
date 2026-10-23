@@ -8,8 +8,13 @@ from app.schemas.schemas import (
     RegisterResponse,
     UserLoginRequest,
     LoginResponse,
-    UserResponse
+    UserResponse,
+    OTPSendRequest,
+    OTPSendResponse,
+    OTPVerifyRequest,
+    OTPVerifyResponse,
 )
+from app.services.email_service import send_email_otp, verify_email_otp
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -92,4 +97,57 @@ def login(
             "email": user.email,
             "role": user.role
         }
+    }
+
+
+@router.post("/otp/send", response_model=OTPSendResponse)
+def send_otp(
+    data: OTPSendRequest,
+    db: Session = Depends(get_db)
+):
+    """EP-14: Generate and send 6-digit verification code to email"""
+    otp_record, code = send_email_otp(db=db, email=data.email, purpose=data.purpose)
+
+    return {
+        "message": "OTP verification code sent to your email",
+        "email": data.email,
+        "expires_in_seconds": 600,
+        "dev_code": code  # Available for local development / testing demo
+    }
+
+
+@router.post("/otp/verify", response_model=OTPVerifyResponse)
+def verify_otp(
+    data: OTPVerifyRequest,
+    db: Session = Depends(get_db)
+):
+    """EP-15: Verify 6-digit OTP code and issue JWT session"""
+    is_valid, user, token, message = verify_email_otp(
+        db=db,
+        email=data.email,
+        code=data.code,
+        purpose=data.purpose
+    )
+
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": {
+                    "code": "BAD_REQUEST",
+                    "message": message,
+                    "details": []
+                }
+            }
+        )
+
+    return {
+        "message": message,
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role
+        } if user else None
     }
