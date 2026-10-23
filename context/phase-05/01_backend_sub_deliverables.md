@@ -15,15 +15,15 @@
 
 | SD | Scope | Done when | Endpoints | Target date | Status | Evidence |
 |---|---|---|---|---|---|---|
-| SD-1 | Database setup & migrations | All Phase 3.3 tables are created in PostgreSQL with indexes, relationships, and test seed data loads | none | 2026-10-18 | Done | `backend/app/models/models.py`, `backend/seed.py` |
-| SD-2 | Authentication & authorization | Register, login, token issuing, and middleware that protects routes and checks roles (`user`, `admin`) | EP-02, EP-03 | 2026-10-18 | Done | `backend/app/api/auth.py`, `backend/app/api/deps.py` |
+| SD-1 | Database setup & migrations | All Phase 3.3 tables created in PostgreSQL with indexes, relationships, 25-point job attributes, and seed data | none | 2026-10-18 | Done | `backend/app/models/models.py`, `backend/seed.py` |
+| SD-2 | Authentication & authorization | Register, login, email OTP verification, token issuing, and role middleware (`user`, `admin`) | EP-02, EP-03, EP-14, EP-15 | 2026-10-23 | Done | `backend/app/api/auth.py`, `email_service.py`, `deps.py` |
 | SD-3 | Core CRUD entities | Create/read/update/delete for the primary resources: profiles, skills, jobs, bookmarks | EP-04, EP-05, EP-06, EP-07, EP-08, EP-10, EP-11, EP-12 | 2026-10-18 | Done | `backend/app/api/profile.py`, `jobs.py`, `skills.py`, `saved_jobs.py` |
 | SD-4 | Complex business logic & AI matching | Dual-metric AI job recommendation engine (`required_skill_coverage` + `semantic_similarity` -> `ranking_score`), data cleaning pipeline, background auto-scraper | EP-01, EP-09, EP-13 | 2026-10-18 | Done | `backend/app/services/matching_engine.py`, `importer.py`, `scheduler.py` |
 
 ## 2. Implementation Notes
 
-- **SD-1 (Database Setup):** Tables created in PostgreSQL 16 Alpine Docker container with SQLAlchemy ORM declarative models. Created 7 tables: `users`, `profiles`, `skills`, `profile_skills`, `job_listings`, `job_skills`, `saved_jobs`. Seed script seeds 15 standard tech skills and test candidate & admin accounts.
-- **SD-2 (Authentication & Security):** Cryptographic password hashing using `bcrypt`. Stateless JWT Bearer tokens signed with HMAC-SHA256. Role-Based Access Control (`role == "admin"`) enforced via FastAPI dependency injection.
+- **SD-1 (Database Setup):** Tables created in PostgreSQL 16 Alpine Docker container with SQLAlchemy ORM declarative models. Created 8 tables: `users`, `profiles`, `skills`, `profile_skills`, `job_listings` (with 25 attributes), `job_skills`, `saved_jobs`, `email_otps`. Seed script seeds 15 standard tech skills and test candidate & admin accounts.
+- **SD-2 (Authentication & Security):** Cryptographic password hashing using `bcrypt`. Stateless JWT Bearer tokens signed with HMAC-SHA256. 6-digit cryptographic Email OTP verification with live Gmail SMTP and anti-reuse protection. Role-Based Access Control (`role == "admin"`) enforced via FastAPI dependency injection.
 - **SD-3 (Core CRUD Resources):** All endpoints implement Pydantic V2 request/response schema validation. Job discovery supports search by title, company, description, and filter by source (JobNet, BongThom, Khmer24, Telegram), experience level, and location.
 - **SD-4 (AI Engine & Auto-Scraping):**
   - AI engine combines explainable skill coverage with dense multilingual vector embeddings via `paraphrase-multilingual-MiniLM-L12-v2` (384-dimensional dense vectors supporting English + Khmer Unicode script).

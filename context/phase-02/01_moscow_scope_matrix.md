@@ -48,4 +48,5 @@ After this phase, scope is frozen so you can focus on building. Changes are stil
 
 | Date | Change | Why |
 |---|---|---|
-| | | |
+| 2026-10-23 | Added Email OTP verification (EP-14: POST /api/v1/auth/otp/send, EP-15: POST /api/v1/auth/otp/verify) | Enhanced candidate verification and passwordless flow with 6-digit Email OTP |
+| 2026-10-23 | Expanded JobListing schema with 7 recommended attributes (work_arrangement, salary_period, dedup_hash, etc.) | Enriched job discovery, deduplication, and candidate matching pipeline |

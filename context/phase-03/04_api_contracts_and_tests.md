@@ -44,6 +44,8 @@
 | EP-11 | POST | /api/v1/saved-jobs/{job_id} | Bookmark a job listing for future review | Yes | F-09 |
 | EP-12 | DELETE | /api/v1/saved-jobs/{job_id} | Remove a bookmark | Yes | F-09 |
 | EP-13 | POST | /api/v1/admin/scrape | Trigger background ingestion of target sources | Yes (Admin) | F-03, F-04 |
+| EP-14 | POST | /api/v1/auth/otp/send | Generate and send 6-digit OTP code to email | No | F-01 |
+| EP-15 | POST | /api/v1/auth/otp/verify | Verify 6-digit OTP code and issue JWT session | No | F-01 |
 
 ## 3. Endpoint Contract Cards
 
@@ -391,6 +393,65 @@ Success response, 200 OK:
 |---|---|
 | 401 UNAUTHORIZED | Not logged in |
 | 403 FORBIDDEN | User does not have 'admin' role |
+
+---
+
+### EP-14 — POST /api/v1/auth/otp/send
+Generates a 6-digit verification code and dispatches it to the candidate's email.
+
+Request body:
+```json
+{
+  "email": "dara@example.com",
+  "purpose": "login_or_verify"
+}
+```
+
+Success response, 200 OK:
+```json
+{
+  "message": "OTP verification code sent to your email",
+  "email": "dara@example.com",
+  "expires_in_seconds": 600
+}
+```
+
+| Error | When it happens |
+|---|---|
+| 422 VALIDATION ERROR | Invalid email address format |
+
+---
+
+### EP-15 — POST /api/v1/auth/otp/verify
+Verifies the 6-digit code. If valid, issues a Bearer JWT access token.
+
+Request body:
+```json
+{
+  "email": "dara@example.com",
+  "code": "123456",
+  "purpose": "login_or_verify"
+}
+```
+
+Success response, 200 OK:
+```json
+{
+  "message": "OTP verified successfully",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": 1,
+    "email": "dara@example.com",
+    "role": "user"
+  }
+}
+```
+
+| Error | When it happens |
+|---|---|
+| 400 BAD REQUEST | Incorrect, expired, or already-used OTP code |
+
 
 ---
 

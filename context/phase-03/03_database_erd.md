@@ -218,3 +218,18 @@ Stores user bookmarks for listings saved to be reviewed or applied to later.
 | job_id | integer | FK → job_listings.id ON DELETE CASCADE | No | Bookmarked vacancy reference |
 | created_at | timestamp | DEFAULT now() | No | When the bookmark was saved |
 | updated_at | timestamp | DEFAULT now() | No | When the bookmark record was updated |
+
+---
+
+### Table: `email_otps`
+Stores temporary 6-digit OTP verification codes for email verification and passwordless authentication.
+
+| Column | Data type | Constraints | Nullable | Description |
+|---|---|---|---|---|
+| id | integer | PRIMARY KEY, SERIAL | No | Unique OTP identifier |
+| email | varchar(255) | INDEX | No | Target recipient email address |
+| code | varchar(6) | | No | 6-digit cryptographic verification code |
+| purpose | varchar(50) | DEFAULT 'login_or_verify' | No | Purpose of OTP ('register', 'login', 'reset') |
+| expires_at | timestamptz | | No | Expiration timestamp (default 10 minutes) |
+| is_used | boolean | DEFAULT false | No | Whether this code was already consumed |
+| created_at | timestamptz | DEFAULT now() | No | When the code was generated |

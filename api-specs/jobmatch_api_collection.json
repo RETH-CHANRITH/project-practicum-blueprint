@@ -212,6 +212,43 @@
           "path": ["api", "v1", "admin", "scrape"]
         }
       }
+    },
+    {
+      "name": "EP-14 Send Email OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"dara@example.com\",\n  \"purpose\": \"login_or_verify\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/otp/send",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "otp", "send"]
+        }
+      }
+    },
+    {
+      "name": "EP-15 Verify Email OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"dara@example.com\",\n  \"code\": \"123456\",\n  \"purpose\": \"login_or_verify\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/otp/verify",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "otp", "verify"]
+        }
+      }
     }
   ]
 }
+
