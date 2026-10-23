@@ -61,6 +61,7 @@ flowchart LR
 | PostgreSQL Database | Persists users, profiles, normalized job listings, skill taxonomies, and saved bookmarks | PostgreSQL 16 | Continuously (Docker container) | Backend API, Scraper Pipeline |
 | Scraper & Data Pipeline | Periodically extracts raw jobs from external websites and Telegram, cleans text, and deduplicates records | Python (BeautifulSoup4, Telethon) | Scheduled daily (cron / APScheduler) or manual trigger | External Job Boards, Telegram Channel, PostgreSQL |
 | AI Matching Engine | Computes skill-vector Cosine Similarity and match score percentages (0–100%) between candidates and jobs | Python (scikit-learn, NumPy) | On each recommendations API request | Backend API |
+| Email Service (SMTP) | Dispatches branded HTML 6-digit OTP verification codes to candidate email inboxes | Python (smtplib, MIME) via Google Gmail SMTP (TLS port 587) | On OTP send request (`EP-14`) | Candidate Email Inbox (Google Mail) |
 | External Sources | Third-party platforms where vacancies are published | CamHR, BongThom, Telegram (`@internshipscambodia`) | External availability | Scraper Pipeline |
 
 Where do secrets (database password, API keys, token secret) live, and which components can reach the database directly?

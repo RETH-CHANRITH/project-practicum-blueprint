@@ -67,7 +67,7 @@ The Figma workspace is organised into three main areas:
 | Screen ID | Screen name | Purpose | Figma frame | User journey | Endpoint |
 |---|---|---|---|---|---|
 | SCR-01 | Splash / Welcome | App branding and onboarding trigger | `SCR-01 / Welcome` | UJ-01 | None |
-| SCR-02 | Login & Register | Candidate authentication and account creation | `SCR-02 / Auth` | UJ-01 | EP-02, EP-03 |
+| SCR-02 | Login & Register | Candidate authentication, passwordless Email OTP verification, and account creation | `SCR-02 / Auth` | UJ-01 | EP-02, EP-03, EP-14, EP-15 |
 | SCR-03 | Home Job Feed | Aggregated feed with keyword search & source chips | `SCR-03 / HomeFeed` | UJ-03, UJ-08 | EP-07 |
 | SCR-04 | Job Detail View | Full job requirements, salary, and external apply link | `SCR-04 / JobDetail` | UJ-04, UJ-05 | EP-08 |
 | SCR-05 | AI Recommendations | Personalized job feed sorted by match score with matched vs missing skills | `SCR-05 / AIRecommendations` | UJ-05, UJ-06 | EP-09 |
