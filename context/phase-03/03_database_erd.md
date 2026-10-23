@@ -79,12 +79,19 @@ erDiagram
         numeric salary_min
         numeric salary_max
         string salary_currency
+        string salary_period
         boolean is_negotiable
         text description
         string source
         string source_url UK
+        string company_url
+        string application_url
+        string work_arrangement
         date posted_at
         date deadline
+        timestamp scraped_at
+        string status
+        string dedup_hash
         boolean is_active
         timestamp created_at
         timestamp updated_at
@@ -105,7 +112,18 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+
+    email_otps {
+        int id PK
+        string email
+        string code
+        string purpose
+        timestamp expires_at
+        boolean is_used
+        timestamp created_at
+    }
 ```
+
 
 ![Database ERD](../assets/database_erd.jpg)
 
@@ -183,12 +201,19 @@ Stores clean, normalized job vacancies aggregated from external sources.
 | salary_min | numeric(10,2) | CHECK (salary_min >= 0) | Yes | Minimum salary in USD (no float) |
 | salary_max | numeric(10,2) | CHECK (salary_max >= salary_min) | Yes | Maximum salary in USD (no float) |
 | salary_currency | varchar(10) | DEFAULT 'USD' | No | Currency denomination |
+| salary_period | varchar(20) | DEFAULT 'monthly' | Yes | Pay frequency (monthly, yearly, hourly, daily) |
 | is_negotiable | boolean | DEFAULT false | No | Whether salary is marked negotiable |
 | description | text | | No | Full job description and requirements text |
 | source | varchar(50) | | No | Origin platform ('Telegram', 'CamHR', 'BongThom') |
 | source_url | text | UNIQUE | No | Direct URL to original post for external application |
+| company_url | text | | Yes | Official hiring company website URL |
+| application_url | text | | Yes | Direct application URL (Google Form, external portal) |
+| work_arrangement | varchar(50) | | Yes | Work environment ('on-site', 'hybrid', 'remote') |
 | posted_at | date | | Yes | Original publication date on source platform |
 | deadline | date | | Yes | Application deadline |
+| scraped_at | timestamptz | | Yes | Timestamp when listing was scraped or updated |
+| status | varchar(20) | DEFAULT 'active' | No | Lifecycle status ('active', 'expired', 'closed') |
+| dedup_hash | varchar(64) | INDEX | Yes | MD5 fingerprint for duplicate prevention |
 | is_active | boolean | DEFAULT true | No | Whether the vacancy is currently active |
 | created_at | timestamp | DEFAULT now() | No | When the listing was ingested into database |
 | updated_at | timestamp | DEFAULT now() | No | When the listing was last updated |
