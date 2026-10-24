@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, Text, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint
+    Column, Integer, String, Text, Boolean, Numeric, Date, DateTime, ForeignKey, CheckConstraint, Float, UniqueConstraint
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -82,19 +82,33 @@ class JobListing(Base):
     source = Column(String(50), nullable=False)
     source_url = Column(Text, unique=True, nullable=False)
     company_url = Column(Text, nullable=True)                       # company website link
+    company_logo_url = Column(Text, nullable=True)                  # company logo image URL
+    raw_title = Column(String(255), nullable=True)                  # original uncleaned title
+    normalized_location = Column(String(255), nullable=True)        # standardized location for filtering
+    openings = Column(Integer, default=1, nullable=True)            # total number of available openings
+    source_post_id = Column(String(100), nullable=True, index=True) # external platform post ID
     posted_at = Column(Date, nullable=True)
     deadline = Column(Date, nullable=True)
     work_arrangement = Column(String(50), nullable=True)            # on-site | hybrid | remote
     scraped_at = Column(DateTime(timezone=True), nullable=True)     # when the scraper last collected this
+    last_seen_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(String(20), default="active", nullable=False)   # active | expired | closed
     application_url = Column(Text, nullable=True)                   # direct apply link (if different from source_url)
-    dedup_hash = Column(String(64), nullable=True, index=True)      # MD5 fingerprint for duplicate detection
+    apply_email = Column(String(255), nullable=True)
+    apply_phone = Column(String(100), nullable=True)
+    apply_telegram = Column(String(100), nullable=True)
+    dedup_hash = Column(String(64), nullable=True, index=True)      # SHA-256 fingerprint for duplicate detection
+    duplicate_of = Column(Integer, ForeignKey("job_listings.id", ondelete="SET NULL"), nullable=True, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     skills = relationship("JobSkill", back_populates="job", cascade="all, delete-orphan")
     saved_by = relationship("SavedJob", back_populates="job", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        UniqueConstraint("source", "source_post_id", name="uq_job_listings_source_post_id"),
+    )
 
 
 class JobSkill(Base):
@@ -133,3 +147,107 @@ class EmailOTP(Base):
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_used = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+# -----------------------------------------------------------------------------
+# Dedicated Telegram Jobs Table (all 33 fields, multi-job support)
+# -----------------------------------------------------------------------------
+class TelegramJob(Base):
+    __tablename__ = "telegram_jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    company = Column(String(255), nullable=True, index=True)
+    location = Column(String(255), nullable=True)
+    normalized_location = Column(String(255), nullable=True)
+    work_arrangement = Column(String(50), nullable=True)     # onsite | hybrid | remote
+    job_type = Column(String(50), nullable=True)             # internship | full_time | part_time | contract
+    experience_level = Column(String(50), nullable=True)     # entry | junior | mid | senior
+    description = Column(Text, nullable=True)
+    raw_text = Column(Text, nullable=False)                  # Original message for re-parsing
+    language = Column(String(20), nullable=True)             # en | km | mixed
+
+    # Salary
+    salary_min = Column(Numeric(10, 2), nullable=True)
+    salary_max = Column(Numeric(10, 2), nullable=True)
+    salary_currency = Column(String(10), default="USD", nullable=True)
+    salary_period = Column(String(20), default="month", nullable=True)
+    is_negotiable = Column(Boolean, default=False, nullable=True)
+
+    # Dates
+    posted_at = Column(Date, nullable=False)
+    deadline = Column(Date, nullable=True)
+    message_edited_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Application / Contact methods
+    application_url = Column(Text, nullable=True)
+    apply_email = Column(String(255), nullable=True)
+    apply_phone = Column(String(100), nullable=True)
+    apply_telegram = Column(String(100), nullable=True)      # @recruiter username
+
+    # Source
+    source_platform = Column(String(50), default="telegram", nullable=False)
+    source = Column(String(100), nullable=False, index=True) # e.g. @internshipscambodia
+    source_post_id = Column(String(100), nullable=False, index=True)
+    job_index = Column(Integer, default=0, nullable=False)   # 0 for single; 0, 1, 2 for multi-job posts
+    source_url = Column(Text, nullable=True)
+
+    # Quality & Lifecycle
+    dedup_hash = Column(String(64), nullable=False, index=True)
+    parse_confidence = Column(Float, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    scraped_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    last_seen_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    expired_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("source", "source_post_id", "job_index", name="uq_telegram_channel_post_job"),
+    )
+
+
+# -----------------------------------------------------------------------------
+# Dedicated Web Jobs Table (Web portals: BongThom, JobNet, CamboJob, Khmer24)
+# -----------------------------------------------------------------------------
+class WebJob(Base):
+    __tablename__ = "web_jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    raw_title = Column(String(255), nullable=True)
+    company = Column(String(255), nullable=False, index=True)
+    company_url = Column(Text, nullable=True)
+    company_logo_url = Column(Text, nullable=True)
+    location = Column(String(255), default="Phnom Penh", nullable=False)
+    normalized_location = Column(String(255), nullable=True)
+    work_arrangement = Column(String(50), nullable=True)
+    job_type = Column(String(50), default="full_time", nullable=True)
+    experience_level = Column(String(50), default="entry", nullable=True)
+
+    # Salary
+    salary_min = Column(Numeric(10, 2), nullable=True)
+    salary_max = Column(Numeric(10, 2), nullable=True)
+    salary_currency = Column(String(10), default="USD", nullable=True)
+    salary_period = Column(String(20), default="month", nullable=True)
+    is_negotiable = Column(Boolean, default=False, nullable=True)
+    openings = Column(Integer, default=1, nullable=True)
+
+    description = Column(Text, nullable=False)
+    source_portal = Column(String(100), nullable=False, index=True)  # BongThom, JobNet, etc.
+    source_url = Column(Text, unique=True, nullable=False)
+    source_job_id = Column(String(100), nullable=True)
+    application_url = Column(Text, nullable=True)
+
+    # Dates
+    posted_at = Column(Date, nullable=True)
+    deadline = Column(Date, nullable=True)
+
+    # Quality & Lifecycle
+    dedup_hash = Column(String(64), nullable=False, index=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    scraped_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    last_seen_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+

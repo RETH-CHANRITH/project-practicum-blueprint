@@ -54,6 +54,7 @@ def get_admin_stats(
     )
 
 from app.services.importer import import_from_json_file
+from app.services.scraper import scrape_and_ingest_telegram, scrape_and_ingest_web_url
 import os
 
 @router.post("/scrape", response_model=ScrapeResponse, status_code=status.HTTP_200_OK)
@@ -63,14 +64,30 @@ def trigger_scrape(
     db: Session = Depends(get_db)
 ):
     """
-    EP-13: Trigger data ingestion from specified sources (Telegram or Web Aggregators).
-    Admin privileges required (returns 403 Forbidden for regular users).
-    Supports: 'all', 'telegram', 'khmer24', 'bongthom', 'jobnet', 'cambojob', etc.
+    EP-13: Trigger live data ingestion from specified sources:
+    - Web job URL (e.g. https://www.bongthom.com/job/123 or any job posting)
+    - Telegram channel / URL (e.g. 'internshipscambodia', '@channel', 'https://t.me/s/...')
+    - Historical dataset ('khmer24', 'bongthom', 'jobnet', 'cambojob', etc.)
+    Admin privileges required.
     """
-    src_lower = request.source.lower().strip()
+    src_clean = request.source.strip()
+    src_lower = src_clean.lower()
     poc_dir = "/Users/microstore/Documents/RUPP_YEAR_4/PP/POC"
 
-    # Map friendly source names or URLs to datasets
+    # 1. Direct Web Scraping: When a web URL is passed (http:// or https:// not t.me)
+    if (src_lower.startswith("http://") or src_lower.startswith("https://")) and "t.me" not in src_lower:
+        web_res = scrape_and_ingest_web_url(db=db, web_url=src_clean)
+        return ScrapeResponse(
+            status=web_res.get("status", "success"),
+            source=web_res.get("source", "Web"),
+            new_jobs_added=web_res.get("new_jobs_added", 0),
+            duplicates_skipped=web_res.get("duplicates_skipped", 0),
+            total_jobs=web_res.get("total_jobs", db.query(JobListing).count()),
+            channel=None,
+            saved_job=web_res.get("job")
+        )
+
+    # 2. Local POC dataset imports (if file exists)
     source_files = {
         "khmer24": "Khmer24_com.json",
         "bongthom": "BongThom_com.json",
@@ -83,10 +100,9 @@ def trigger_scrape(
         "all": "jobs_all.json",
     }
 
-    # Resolve matched source key from either name or URL
     matched_key = None
     for key in source_files:
-        if key in src_lower:
+        if key == src_lower or f"{key}.com" in src_lower:
             matched_key = key
             break
 
@@ -103,8 +119,8 @@ def trigger_scrape(
             channel=None
         )
 
-    # Otherwise default to Telegram live scraping
-    tg_result = scrape_and_ingest_telegram(db=db, channel_or_url=request.source)
+    # 3. Default to live Telegram scraping
+    tg_result = scrape_and_ingest_telegram(db=db, channel_or_url=src_clean)
     return ScrapeResponse(
         status=tg_result.get("status", "success"),
         source="Telegram",

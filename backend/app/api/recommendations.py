@@ -72,6 +72,13 @@ def get_recommendations(
             "E.g. 50 = only show jobs where the candidate covers ≥ 50% of required skills."
         )
     ),
+    min_ranking: float = Query(
+        0.0, ge=0.0, le=1.0,
+        description=(
+            "Minimum ranking_score (0.0 to 1.0) to include a job. "
+            "E.g. 0.50 = only show jobs with ranking_score >= 0.50."
+        )
+    ),
     # ── Ranking weight controls ──────────────────────────────────────────
     w_skill: float = Query(
         0.70, ge=0.0, le=1.0,
@@ -114,6 +121,7 @@ def get_recommendations(
         user_id=current_user.id,
         db=db,
         min_score=min_score,
+        min_ranking=min_ranking,
         w_skill=w_skill,
         w_semantic=w_semantic,
     )

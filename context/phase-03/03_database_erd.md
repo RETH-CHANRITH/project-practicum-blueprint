@@ -72,10 +72,14 @@ erDiagram
     job_listings {
         int id PK
         string title
+        string raw_title
         string company
+        string company_logo_url
         string location
+        string normalized_location
         string experience_level
         string job_type
+        int openings
         numeric salary_min
         numeric salary_max
         string salary_currency
@@ -84,12 +88,18 @@ erDiagram
         text description
         string source
         string source_url UK
+        string source_post_id
         string company_url
         string application_url
         string work_arrangement
         date posted_at
         date deadline
         timestamp scraped_at
+        timestamptz last_seen_at
+        int duplicate_of FK
+        string apply_email
+        string apply_phone
+        string apply_telegram
         string status
         string dedup_hash
         boolean is_active
@@ -194,10 +204,14 @@ Stores clean, normalized job vacancies aggregated from external sources.
 |---|---|---|---|---|
 | id | integer | PRIMARY KEY, SERIAL | No | Unique job listing identifier |
 | title | varchar(200) | | No | Normalized job title |
+| raw_title | varchar(255) | | Yes | Original uncleaned title string as published on source |
 | company | varchar(150) | | No | Verified hiring organization name |
+| company_logo_url | text | | Yes | URL path to company branding logo image |
 | location | varchar(100) | | No | Job location (e.g. Phnom Penh, Remote) |
+| normalized_location | varchar(255) | | Yes | Standardized location identifier for geographic filtering |
 | experience_level | varchar(50) | DEFAULT 'entry' | No | Required seniority level |
 | job_type | varchar(50) | DEFAULT 'full-time' | No | Employment type (full-time, part-time, internship) |
+| openings | integer | DEFAULT 1 | Yes | Total number of available openings for the position |
 | salary_min | numeric(10,2) | CHECK (salary_min >= 0) | Yes | Minimum salary in USD (no float) |
 | salary_max | numeric(10,2) | CHECK (salary_max >= salary_min) | Yes | Maximum salary in USD (no float) |
 | salary_currency | varchar(10) | DEFAULT 'USD' | No | Currency denomination |
@@ -206,12 +220,18 @@ Stores clean, normalized job vacancies aggregated from external sources.
 | description | text | | No | Full job description and requirements text |
 | source | varchar(50) | | No | Origin platform ('Telegram', 'CamHR', 'BongThom') |
 | source_url | text | UNIQUE | No | Direct URL to original post for external application |
+| source_post_id | varchar(100) | INDEX | Yes | External unique identifier on original source platform |
 | company_url | text | | Yes | Official hiring company website URL |
 | application_url | text | | Yes | Direct application URL (Google Form, external portal) |
 | work_arrangement | varchar(50) | | Yes | Work environment ('on-site', 'hybrid', 'remote') |
 | posted_at | date | | Yes | Original publication date on source platform |
 | deadline | date | | Yes | Application deadline |
 | scraped_at | timestamptz | | Yes | Timestamp when listing was scraped or updated |
+| last_seen_at | timestamptz | | Yes | Most recent scrape confirmation timestamp |
+| duplicate_of | integer | FK → job_listings.id, INDEX | Yes | ID of canonical primary job if this is a cross-source duplicate |
+| apply_email | varchar(255) | | Yes | Contact email address extracted from original posting |
+| apply_phone | varchar(100) | | Yes | Contact phone number extracted from original posting |
+| apply_telegram | varchar(100) | | Yes | Telegram contact handle/username extracted from post |
 | status | varchar(20) | DEFAULT 'active' | No | Lifecycle status ('active', 'expired', 'closed') |
 | dedup_hash | varchar(64) | INDEX | Yes | MD5 fingerprint for duplicate prevention |
 | is_active | boolean | DEFAULT true | No | Whether the vacancy is currently active |

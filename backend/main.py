@@ -18,6 +18,13 @@ async def lifespan(app: FastAPI):
     task = None
     if settings.AUTO_SCRAPER_ENABLED:
         task = asyncio.create_task(auto_scrape_loop())
+
+    if settings.WARM_EMBEDDINGS_ON_STARTUP:
+        from app.core.database import SessionLocal
+        from app.services.matching_engine import warm_job_embeddings
+        with SessionLocal() as db:
+            warm_job_embeddings(db)
+
     yield
     # Clean shutdown
     if task:

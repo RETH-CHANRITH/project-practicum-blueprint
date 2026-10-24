@@ -18,8 +18,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     
     # Scraper & Background Scheduler
-    SCRAPER_INTERVAL_MINUTES: int = 60
+    SCRAPER_INTERVAL_MINUTES: int = 30   # default: scrape every 30 minutes
     AUTO_SCRAPER_ENABLED: bool = True
+
+    # Recommendation Engine
+    WARM_EMBEDDINGS_ON_STARTUP: bool = False
 
     # Email & OTP Settings
     SMTP_HOST: str = "smtp.gmail.com"

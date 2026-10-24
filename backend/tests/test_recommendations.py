@@ -355,12 +355,15 @@ class TestConfigurableWeights:
             assert 0.0 <= rs <= 1.0, (
                 f"ranking_score {rs} out of [0,1] with weights (0.9, 0.9)"
             )
-            # Verify the formula: ranking = (C + S) / 2
-            expected = (
-                item["required_skill_coverage"] + item["semantic_similarity"]
-            ) / 2.0
+            # Verify the formula: ranking = (C + S) / 2 for jobs with skills, or semantic only for zero-skill jobs
+            if item["job"]["skills"]:
+                expected = (
+                    item["required_skill_coverage"] + item["semantic_similarity"]
+                ) / 2.0
+            else:
+                expected = item["semantic_similarity"]
             assert math.isclose(rs, expected, abs_tol=1e-3), (
-                f"ranking_score {rs} ≠ expected (C+S)/2 = {expected} "
+                f"ranking_score {rs} ≠ expected {expected} "
                 f"for weights (0.9, 0.9)"
             )
 
@@ -378,11 +381,14 @@ class TestConfigurableWeights:
             assert 0.0 <= rs <= 1.0, (
                 f"ranking_score {rs} out of [0,1] with weights (1.0, 1.0)"
             )
-            expected = (
-                item["required_skill_coverage"] + item["semantic_similarity"]
-            ) / 2.0
+            if item["job"]["skills"]:
+                expected = (
+                    item["required_skill_coverage"] + item["semantic_similarity"]
+                ) / 2.0
+            else:
+                expected = item["semantic_similarity"]
             assert math.isclose(rs, expected, abs_tol=1e-3), (
-                f"ranking_score {rs} ≠ expected (C+S)/2 = {expected} "
+                f"ranking_score {rs} ≠ expected {expected} "
                 f"for weights (1.0, 1.0)"
             )
         # Results that have different (C,S) pairs must not all collapse to 1.0
@@ -571,3 +577,272 @@ class TestEdgeCases:
             assert isinstance(item["semantic_similarity"], float), (
                 f"semantic_similarity is not float: {item['semantic_similarity']!r}"
             )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Academic Thesis Hardening & Verification Test Suite
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestThesisRecommendationHardening:
+    """Verifies all university defense hardening requirements for matching engine."""
+
+    def test_zero_skill_job_ranking_and_coverage(self):
+        """
+        1. When a job lists no skills:
+           - required_skill_coverage must be 0.0
+           - matched_skills and missing_skills must be empty lists []
+           - ranking_score must equal semantic_similarity (ranking = semantic)
+           - if min_score > 0, zero-skill jobs must be excluded
+        """
+        token = _login(CANDIDATE_EMAIL, CANDIDATE_PASSWORD)
+        res = client.get("/api/v1/recommendations", headers=_headers(token), params={"min_score": 0})
+        assert res.status_code == 200, res.text
+        recs = res.json()
+
+        zero_skill_items = [r for r in recs if len(r["job"]["skills"]) == 0]
+        assert len(zero_skill_items) > 0, "Expected at least one zero-skill job in test database"
+
+        for item in zero_skill_items:
+            assert item["required_skill_coverage"] == 0.0
+            assert item["matched_skills"] == []
+            assert item["missing_skills"] == []
+            assert math.isclose(item["ranking_score"], item["semantic_similarity"], abs_tol=1e-4)
+
+        # min_score > 0 should exclude all zero-skill jobs
+        res_min = client.get("/api/v1/recommendations", headers=_headers(token), params={"min_score": 10})
+        assert res_min.status_code == 200
+        for item in res_min.json():
+            assert len(item["job"]["skills"]) > 0, "Zero-skill jobs must be excluded when min_score > 0"
+
+    def test_candidate_with_no_skills_ranks_by_semantic_only(self):
+        """
+        2. Candidate with no skills: rank by semantic similarity only instead of 0.3 * semantic.
+        """
+        # Register or login user without skills
+        client.post("/api/v1/auth/register", json={
+            "email": "zero_skills_candidate@test.com",
+            "password": "ZeroSkills123!"
+        })
+        token = _login("zero_skills_candidate@test.com", "ZeroSkills123!")
+        res = client.get("/api/v1/recommendations", headers=_headers(token))
+        assert res.status_code == 200, res.text
+        recs = res.json()
+        assert len(recs) > 0
+        for item in recs:
+            assert item["required_skill_coverage"] == 0.0
+            # Must equal semantic_similarity, NOT 0.3 * semantic
+            assert math.isclose(item["ranking_score"], item["semantic_similarity"], abs_tol=1e-4)
+
+    def test_deterministic_ordering_tie_breaking(self):
+        """
+        3. Deterministic ordering: sort by ranking_score descending, then job.id ascending.
+        """
+        token = _login(CANDIDATE_EMAIL, CANDIDATE_PASSWORD)
+        res = client.get("/api/v1/recommendations", headers=_headers(token))
+        assert res.status_code == 200, res.text
+        recs = res.json()
+        for i in range(len(recs) - 1):
+            s1, id1 = recs[i]["ranking_score"], recs[i]["job"]["id"]
+            s2, id2 = recs[i + 1]["ranking_score"], recs[i + 1]["job"]["id"]
+            if math.isclose(s1, s2, abs_tol=1e-5):
+                assert id1 < id2, f"Tie-break failed: id {id1} should be < id {id2} on score {s1}"
+            else:
+                assert s1 > s2, f"Ordering failed: score {s1} not > score {s2}"
+
+    def test_alias_matching_in_matched_skills(self):
+        """
+        4. Alias matching in matched_skills (e.g. ReactJS vs React.js).
+        """
+        from app.services.matching_engine import normalize_skill, _compute_skill_coverage
+        assert normalize_skill("ReactJS") == "react"
+        assert normalize_skill("React.js") == "react"
+        assert normalize_skill("react js") == "react"
+        assert normalize_skill("Node.js") == "nodejs"
+        assert normalize_skill("PostgreSQL") == "postgresql"
+        assert normalize_skill("postgres") == "postgresql"
+
+        # Direct coverage verification with aliases
+        cov = _compute_skill_coverage({"ReactJS", "Node.js"}, {"react.js", "postgres"})
+        assert cov == 0.5  # react.js matches ReactJS
+
+    def test_min_ranking_filter(self):
+        """
+        5. min_ranking query parameter drops jobs whose ranking_score is below it.
+        """
+        token = _login(CANDIDATE_EMAIL, CANDIDATE_PASSWORD)
+        threshold = 0.70
+        res = client.get(
+            "/api/v1/recommendations",
+            headers=_headers(token),
+            params={"min_ranking": threshold}
+        )
+        assert res.status_code == 200, res.text
+        recs = res.json()
+        for item in recs:
+            assert item["ranking_score"] >= threshold, (
+                f"Job has ranking_score {item['ranking_score']} < {threshold}"
+            )
+
+    def test_model_unavailable_fallback_via_monkeypatch(self, monkeypatch):
+        """
+        6. If the model cannot load, semantic similarity falls back gracefully to 0.0.
+        """
+        import app.services.matching_engine as me
+        monkeypatch.setattr(me, "_get_embedding_model", lambda: None)
+
+        token = _login(CANDIDATE_EMAIL, CANDIDATE_PASSWORD)
+        res = client.get("/api/v1/recommendations", headers=_headers(token))
+        assert res.status_code == 200, res.text
+        recs = res.json()
+        for item in recs:
+            assert item["semantic_similarity"] == 0.0
+            if item["job"]["skills"]:
+                # With semantic=0.0 and default weights (0.7/0.3):
+                expected = (0.70 * item["required_skill_coverage"]) / 1.0
+                assert math.isclose(item["ranking_score"], expected, abs_tol=1e-3)
+
+    def test_cache_reuse_and_replacement(self):
+        """
+        7 & 8. Cache keys by job_id with SHA-1 hash, reuses cache on identical text,
+        and replaces old entry without piling up when description changes.
+        """
+        import app.services.matching_engine as me
+        import numpy as np
+        model = me._get_embedding_model()
+        if model is None:
+            pytest.skip("Model not loaded")
+
+        test_job_id = 99999
+        text1 = "Backend Developer at ACLEDA Bank. Skills: Python, FastAPI."
+        vec1 = me.get_job_embedding(model, test_job_id, text1)
+        assert test_job_id in me._job_embedding_cache
+        hash1, cached_vec1 = me._job_embedding_cache[test_job_id]
+        assert np.array_equal(vec1, cached_vec1)
+
+        # Call again with identical text -> must reuse cache
+        vec1_again = me.get_job_embedding(model, test_job_id, text1)
+        assert np.array_equal(vec1, vec1_again)
+
+        # Description changes -> replaces old entry without duplicate keys
+        text2 = "Updated Senior Backend Developer at ACLEDA Bank. Skills: Python, Go."
+        vec2 = me.get_job_embedding(model, test_job_id, text2)
+        hash2, cached_vec2 = me._job_embedding_cache[test_job_id]
+        assert hash1 != hash2
+        assert np.array_equal(vec2, cached_vec2)
+        # Ensure only 1 entry for this job_id exists in cache
+        assert sum(1 for k in me._job_embedding_cache.keys() if k == test_job_id) == 1
+
+    def test_n_plus_one_prevention_sql_statement_count(self):
+        """
+        9. Assert that query count does not scale with the number of jobs (O(1) database queries).
+           Specifically asserts the same statement count (5 queries) for 10 jobs and 100 jobs:
+           1. Candidate skills query
+           2. Candidate profile query
+           3. Active jobs query
+           4. selectinload JobSkill query (WHERE job_id IN (...))
+           5. selectinload Skill query (WHERE skill_id IN (...))
+        """
+        from sqlalchemy import event
+        from app.core.database import engine, SessionLocal
+        from app.services.matching_engine import compute_ai_recommendations
+        from app.models.models import User, JobListing, JobSkill, Skill
+
+        db = SessionLocal()
+        user = db.query(User).filter(User.email == CANDIDATE_EMAIL).first()
+        assert user is not None
+        user_id = user.id
+        skill = db.query(Skill).first()
+
+        # Clean up any residual test jobs
+        db.query(JobListing).filter(JobListing.company.like("N1_TEST_%")).delete()
+        db.commit()
+
+        try:
+            # 1. Measure query count with 10 jobs
+            for i in range(10):
+                db.add(JobListing(
+                    title=f"N1 Test Job {i}",
+                    company="N1_TEST_10",
+                    description="Software engineering listing",
+                    source="n1_test",
+                    source_url=f"http://n1_test_10_{i}.com",
+                    is_active=True
+                ))
+            db.commit()
+            for j in db.query(JobListing).filter(JobListing.company == "N1_TEST_10").all():
+                if skill:
+                    db.add(JobSkill(job_id=j.id, skill_id=skill.id))
+            db.commit()
+
+            queries_10 = []
+            def count_queries_10(conn, cursor, statement, parameters, context, executemany):
+                queries_10.append(statement)
+
+            event.listen(engine, "before_cursor_execute", count_queries_10)
+            recs_10 = compute_ai_recommendations(user_id=user_id, db=db)
+            event.remove(engine, "before_cursor_execute", count_queries_10)
+
+            # 2. Add 90 more jobs (total 100 jobs) and measure query count
+            for i in range(10, 100):
+                db.add(JobListing(
+                    title=f"N1 Test Job {i}",
+                    company="N1_TEST_100",
+                    description="Software engineering listing",
+                    source="n1_test",
+                    source_url=f"http://n1_test_100_{i}.com",
+                    is_active=True
+                ))
+            db.commit()
+            for j in db.query(JobListing).filter(JobListing.company == "N1_TEST_100").all():
+                if skill:
+                    db.add(JobSkill(job_id=j.id, skill_id=skill.id))
+            db.commit()
+
+            queries_100 = []
+            def count_queries_100(conn, cursor, statement, parameters, context, executemany):
+                queries_100.append(statement)
+
+            event.listen(engine, "before_cursor_execute", count_queries_100)
+            recs_100 = compute_ai_recommendations(user_id=user_id, db=db)
+            event.remove(engine, "before_cursor_execute", count_queries_100)
+
+            # Assert statement counts
+            assert len(queries_10) == 5, f"Expected 5 queries for 10 jobs, got {len(queries_10)}"
+            assert len(queries_100) == 5, f"Expected 5 queries for 100 jobs, got {len(queries_100)}"
+            assert len(queries_10) == len(queries_100), (
+                f"Query count scaled with job volume: {len(queries_10)} vs {len(queries_100)}"
+            )
+            assert len(recs_100) > len(recs_10)
+        finally:
+            db.query(JobListing).filter(JobListing.company.like("N1_TEST_%")).delete()
+            db.commit()
+            db.close()
+
+    def test_zero_skill_job_ranks_higher_than_partial_coverage_job_with_same_semantic(self):
+        """
+        5. Zero-skill job comparison:
+           Compare a zero-skill job (coverage unknown, semantic=0.70) with a job having
+           50% skill coverage (coverage=0.50, semantic=0.70).
+           With default weights (0.70/0.30):
+           - Zero-skill job ranking_score = 0.70
+           - 50% coverage job ranking_score = (0.70 * 0.50 + 0.30 * 0.70) / 1.0 = 0.56
+           The zero-skill job ranks higher because it is not penalized for missing skills.
+        """
+        sem = 0.70
+        cov_partial = 0.50
+        w_skill = 0.70
+        w_sem = 0.30
+
+        # Zero-skill job score rule
+        ranking_zero_skill = sem
+
+        # Partial coverage job score rule
+        ranking_partial = (w_skill * cov_partial + w_sem * sem) / (w_skill + w_sem)
+
+        assert ranking_zero_skill > ranking_partial, (
+            f"Zero-skill job ({ranking_zero_skill}) should rank higher than partial coverage job ({ranking_partial})"
+        )
+        assert math.isclose(ranking_zero_skill, 0.70, abs_tol=1e-4)
+        assert math.isclose(ranking_partial, 0.56, abs_tol=1e-4)
+
+

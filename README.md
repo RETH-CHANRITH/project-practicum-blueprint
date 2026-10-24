@@ -19,7 +19,7 @@ Update this section whenever you work on a phase. Your advisor reads it to follo
 |---|---|
 | Now working on | Phase 6 — Frontend Client & Integration |
 | Blockers | None |
-| Last updated | 2026-10-23 |
+| Last updated | 2026-10-24 |
 
 | Phase | Planned due | Status | Submitted on |
 |---|---|---|---|
@@ -46,7 +46,23 @@ Status values: Not started · In progress · Submitted · Rework needed
 
 ## How to Run
 
-_From Phase 5 onward, commands will be listed here to start the database, run migrations and seeds, start the API on port 8000, run the API tests, and start the mobile client._
+```bash
+# 1. Start the PostgreSQL database
+docker compose up -d db
+
+# 2. Install backend dependencies & configure env
+cd backend && pip install -r requirements.txt
+cp .env.example .env
+
+# 3. Run Alembic database migrations
+alembic upgrade head
+
+# 4. Start the FastAPI backend server (port 8000)
+uvicorn main:app --reload --port 8000
+
+# 5. Run the complete test suite (58 automated tests)
+PYTHONPATH=. tests/venv/bin/pytest tests/ -v
+```
 
 ## Repository Layout
 

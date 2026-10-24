@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
@@ -124,6 +124,11 @@ class JobItemResponse(BaseModel):
     status: str = "active"                    # active | expired | closed
     application_url: Optional[str] = None     # direct apply link
     company_url: Optional[str] = None         # company website
+    company_logo_url: Optional[str] = None    # company logo URL
+    raw_title: Optional[str] = None           # uncleaned title
+    normalized_location: Optional[str] = None # standardized location for filtering
+    openings: Optional[int] = 1               # total number of openings
+    source_post_id: Optional[str] = None      # external platform post ID
     scraped_at: Optional[datetime] = None     # when scraper last collected this
     dedup_hash: Optional[str] = None          # MD5 fingerprint
     # -------------------------------------------
@@ -233,6 +238,7 @@ class ScrapeResponse(BaseModel):
     duplicates_skipped: int = 0
     total_jobs: int
     channel: Optional[str] = None
+    saved_job: Optional[Dict[str, Any]] = None
 
 class AdminStatsResponse(BaseModel):
     total_candidates: int

@@ -9,8 +9,9 @@ Provides live status tracking (idle, running, last_scraped_at) for the Admin UI.
 
 import asyncio
 import logging
+import os
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from app.core.config import settings
 from app.core.database import SessionLocal
@@ -24,6 +25,7 @@ scheduler_state: Dict[str, Any] = {
     "current_status": "active",  # 'active', 'scraping_in_progress', 'idle'
     "last_scraped_at": None,
     "last_run_jobs_added": 0,
+    "last_sources": [],           # list of sources scraped in last cycle
     "last_error": None,
 }
 
@@ -34,7 +36,7 @@ async def auto_scrape_loop():
         settings.SCRAPER_INTERVAL_MINUTES
     )
     
-    # Optional short delay on boot to allow DB connection pool to settle
+    # Short delay on boot to allow DB connection pool to settle
     await asyncio.sleep(5)
 
     while True:
@@ -47,11 +49,12 @@ async def auto_scrape_loop():
             result = await loop.run_in_executor(None, _execute_scrape_sync)
 
             scheduler_state["last_scraped_at"] = datetime.utcnow().isoformat() + "Z"
-            scheduler_state["last_run_jobs_added"] = result.get("new_jobs_added", 0)
+            scheduler_state["last_run_jobs_added"] = result.get("total_new_added", 0)
+            scheduler_state["last_sources"] = result.get("sources_scraped", [])
             scheduler_state["current_status"] = "active"
             scheduler_state["last_error"] = None
 
-            logger.info("Auto-scrape cycle completed: %s", result)
+            logger.info("Auto-scrape cycle completed: %s new jobs", result.get("total_new_added", 0))
 
         except Exception as exc:
             logger.error("Auto-scrape cycle failed: %s", exc)
@@ -65,38 +68,59 @@ async def auto_scrape_loop():
 
 def _execute_scrape_sync() -> Dict[str, Any]:
     """
-    Synchronous scrape execution.
-    Automatically queries all active Telegram channels stored in the database
-    and scrapes every one of them on each cycle.
+    Synchronous scrape execution — runs on every scheduler cycle.
+    Scrapes:
+      1. All known Telegram channels from DB + default seed channels
+      2. Any JSON data files found in the /data directory (web sources)
     """
     import re
     from app.models.models import JobListing
+    from app.services.importer import import_from_json_file
 
     db = SessionLocal()
     total_new_added = 0
-    scraped_channels = set(["internshipscambodia"])
+    sources_scraped: List[str] = []
 
     try:
-        # Find all Telegram channels previously ingested into the system
+        # --- 1. Telegram Channels ---
+        seed_channels = {"internshipscambodia"}
         tg_jobs = db.query(JobListing.source_url).filter(JobListing.source == "Telegram").all()
         for row in tg_jobs:
             url = row[0] or ""
             match = re.search(r't\.me/(?:s/)?([^/]+)', url)
             if match:
-                scraped_channels.add(match.group(1).lstrip("@"))
+                seed_channels.add(match.group(1).lstrip("@"))
 
-        # Scrape each active channel automatically
-        for ch in scraped_channels:
+        for ch in sorted(seed_channels):
             try:
                 res = scrape_and_ingest_telegram(db=db, channel_or_url=ch)
-                total_new_added += res.get("new_jobs_added", 0)
+                added = res.get("new_jobs_added", 0)
+                total_new_added += added
+                sources_scraped.append(f"@{ch} (+{added})")
             except Exception as e:
-                logger.warning("Auto-scrape for channel @%s encountered error: %s", ch, e)
+                logger.warning("Telegram scrape @%s failed: %s", ch, e)
+                sources_scraped.append(f"@{ch} (error)")
+
+        # --- 2. Web JSON files (data/ directory) ---
+        data_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data")
+        data_dir = os.path.normpath(data_dir)
+        if os.path.isdir(data_dir):
+            for fname in sorted(os.listdir(data_dir)):
+                if fname.endswith(".json"):
+                    fpath = os.path.join(data_dir, fname)
+                    try:
+                        stats = import_from_json_file(db=db, filepath=fpath)
+                        added = stats.get("inserted", 0)
+                        total_new_added += added
+                        sources_scraped.append(f"{fname} (+{added})")
+                    except Exception as e:
+                        logger.warning("Web import %s failed: %s", fname, e)
+                        sources_scraped.append(f"{fname} (error)")
 
         return {
             "status": "success",
-            "channels_scraped": [f"@{c}" for c in sorted(scraped_channels)],
-            "new_jobs_added": total_new_added
+            "sources_scraped": sources_scraped,
+            "total_new_added": total_new_added,
         }
     finally:
         db.close()

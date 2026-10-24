@@ -197,9 +197,9 @@ Success response, 200 OK:
 ---
 
 ### EP-07 — GET /api/v1/jobs
-Searches and filters active aggregated vacancies.
+Searches and filters active aggregated vacancies. Automatically excludes duplicate listings (`duplicate_of IS NULL`).
 
-Query Parameters: `?q=Flutter&location=Phnom+Penh&job_type=internship&page=1&limit=20`
+Query Parameters: `?q=Flutter&location=Phnom+Penh&job_type=internship&since=2026-10-24T12:00:00Z&page=1&limit=20`
 
 Request body: `none`
 

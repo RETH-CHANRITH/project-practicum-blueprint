@@ -1,4 +1,5 @@
 from typing import Optional, List
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
@@ -35,12 +36,24 @@ def list_jobs(
     experience_level: Optional[str] = Query(None, description="Filter: entry, junior, mid, senior"),
     location: Optional[str] = Query(None, description="Filter by location (e.g. Phnom Penh)"),
     min_salary: Optional[float] = Query(None, description="Minimum expected salary"),
+    since: Optional[str] = Query(None, description="Filter jobs created/seen since timestamp (ISO 8601 or YYYY-MM-DD)"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    """EP-07: Search and filter aggregated jobs with pagination"""
-    query = db.query(JobListing).filter(JobListing.is_active == True)
+    """EP-07: Search and filter aggregated jobs with pagination (returns unique main jobs only)"""
+    query = db.query(JobListing).filter(
+        JobListing.is_active == True,
+        JobListing.duplicate_of.is_(None)
+    )
+
+    if since:
+        try:
+            clean_since = since.strip().replace(" ", "+").replace("Z", "+00:00")
+            since_dt = datetime.fromisoformat(clean_since)
+            query = query.filter(JobListing.created_at >= since_dt)
+        except Exception:
+            pass
 
     if source:
         query = query.filter(JobListing.source.ilike(f"%{source.strip()}%"))
@@ -51,7 +64,8 @@ def list_jobs(
             or_(
                 JobListing.title.ilike(term),
                 JobListing.company.ilike(term),
-                JobListing.description.ilike(term)
+                JobListing.description.ilike(term),
+                JobListing.skills.any(JobSkill.skill.has(Skill.name.ilike(term)))
             )
         )
 

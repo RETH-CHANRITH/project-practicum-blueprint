@@ -4,13 +4,13 @@
 
 **Golden Rule:** An endpoint must pass in your API test collection before you build a screen that uses it.
 
-**Status:** Submitted · **Last updated:** 2026-10-19
+**Status:** Submitted · **Last updated:** 2026-10-24
 
 ## Done When
 
 - [x] Every Phase 3.4 endpoint appears in the matrix
 - [x] Every Must-Have endpoint shows PASS and has at least one passing error-case test
-- [x] The test run report is saved and verified (39/39 tests passing)
+- [x] The test run report is saved and verified (58/58 tests passing)
 - [x] The test collection in `api-specs/` is up to date
 
 ## 1. Test Run
@@ -18,9 +18,9 @@
 | Item | Value |
 |---|---|
 | API testing tool | Pytest (HTTPX / TestClient) + Postman/Bruno Collection |
-| How you ran the whole collection | `PYTHONPATH=. pytest -v` (41 tests) |
-| Test suite result | 41 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
-| Date | 2026-10-23 |
+| How you ran the whole collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (58 tests) |
+| Test suite result | 58 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
+| Date | 2026-10-24 |
 | Test collection file | `api-specs/jobmatch_api_collection.json` |
 
 ## 2. API Verification Matrix
@@ -59,3 +59,5 @@
 | EP-14 | Send OTP with invalid email format | 422 | PASS | Rejected by Pydantic EmailStr validation |
 | EP-15 | Verify OTP with incorrect code | 400 | PASS | Returns `BAD_REQUEST: Invalid verification code` |
 | EP-15 | Verify OTP reusing an already-used code | 400 | PASS | Returns `BAD_REQUEST: No active OTP request` |
+| DEDUP | Phishing fake post with same title but fake contacts | N/A | PASS | Verified in `test_dedup.py`: Contacts in real job are NEVER overwritten |
+| DEDUP | Scrape duplicate post from same source/post_id twice | N/A | PASS | Verified in `test_dedup.py`: Row is updated idempotently with unique constraint |

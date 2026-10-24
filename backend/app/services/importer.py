@@ -97,17 +97,17 @@ def normalize_title(title_raw: Optional[str]) -> str:
     return t[:200]
 
 def normalize_job_type(job_type_raw: Optional[str], text_context: str = "") -> str:
-    """Determine standardized job type."""
+    """Determine standardized job type (snake_case values)."""
     combined = f"{job_type_raw or ''} {text_context}".lower()
     if "intern" in combined:
         return "internship"
     if "part" in combined and "time" in combined:
-        return "part-time"
+        return "part_time"
     if "contract" in combined or "temporary" in combined:
         return "contract"
     if "freelance" in combined:
         return "freelance"
-    return "full-time"
+    return "full_time"
 
 def normalize_experience_level(level_raw: Optional[str], seniority_raw: Optional[str], title: str = "") -> str:
     """Determine standardized experience level."""
@@ -295,6 +295,32 @@ def import_jobs_from_records(
             # Company URL (company website)
             company_url = str(item.get("company_url") or item.get("company_website") or "").strip() or None
 
+            # Company Logo URL
+            company_logo_url = str(item.get("company_logo_url") or item.get("company_logo") or item.get("logo") or "").strip() or None
+
+            # Raw uncleaned title
+            raw_title_val = str(raw_title).strip()[:255] if raw_title else clean_title
+
+            # Normalized location
+            normalized_location = location if "Cambodia" in location else f"{location}, Cambodia"
+
+            # Openings / Vacancy count
+            openings_val = 1
+            raw_openings = item.get("openings") or item.get("vacancy_count") or item.get("vacancies")
+            if raw_openings is not None:
+                try:
+                    openings_val = max(1, int(raw_openings))
+                except Exception:
+                    openings_val = 1
+
+            # Source post external ID
+            source_post_id = str(item.get("source_post_id") or item.get("post_id") or item.get("job_id") or "").strip() or None
+            if not source_post_id and clean_url:
+                # Infer from URL ending
+                url_slug = clean_url.rstrip("/").split("/")[-1].split("?")[0]
+                if len(url_slug) < 100:
+                    source_post_id = url_slug
+
             # Salary period (monthly | yearly | hourly | daily)
             salary_period_raw = (
                 item.get("salary_period")
@@ -313,9 +339,9 @@ def import_jobs_from_records(
                 else:
                     salary_period = "monthly"
 
-            # Dedup hash — MD5 fingerprint of title + company + source_url
-            dedup_raw = f"{clean_title.lower()}|{company.lower()}|{clean_url}"
-            dedup_hash = hashlib.md5(dedup_raw.encode("utf-8")).hexdigest()
+            # Dedup hash — SHA-256 of normalized title|company|location (more collision-resistant)
+            dedup_raw = f"{clean_title.lower()}|{company.lower()}|{location.lower()}"
+            dedup_hash = hashlib.sha256(dedup_raw.encode("utf-8")).hexdigest()[:64]
 
             # Scraped timestamp
             now_utc = datetime.now(timezone.utc)
@@ -361,6 +387,13 @@ def import_jobs_from_records(
                     existing.application_url = application_url
                 if company_url:
                     existing.company_url = company_url
+                if company_logo_url:
+                    existing.company_logo_url = company_logo_url
+                existing.raw_title = raw_title_val
+                existing.normalized_location = normalized_location
+                existing.openings = openings_val
+                if source_post_id:
+                    existing.source_post_id = source_post_id
 
                 # Refresh linked skills
                 db.query(JobSkill).filter(JobSkill.job_id == existing.id).delete()
@@ -370,10 +403,14 @@ def import_jobs_from_records(
                 # Insert new record
                 new_job = JobListing(
                     title=clean_title,
+                    raw_title=raw_title_val,
                     company=company,
+                    company_logo_url=company_logo_url,
                     location=location,
+                    normalized_location=normalized_location,
                     experience_level=experience_level,
                     job_type=job_type,
+                    openings=openings_val,
                     salary_min=salary_min,
                     salary_max=salary_max,
                     salary_currency=salary_currency,
@@ -382,6 +419,7 @@ def import_jobs_from_records(
                     description=full_description,
                     source=source_name,
                     source_url=clean_url,
+                    source_post_id=source_post_id,
                     company_url=company_url,
                     posted_at=posted_date,
                     deadline=deadline_date,

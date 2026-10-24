@@ -17,3 +17,4 @@ pytest>=8.0.0
 # Semantic embedding model — paraphrase-multilingual-MiniLM-L12-v2
 # supports both English and Khmer (Unicode-based tokenization)
 sentence-transformers>=3.0.0
+rapidfuzz>=3.0.0
