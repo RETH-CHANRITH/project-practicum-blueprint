@@ -1,6 +1,6 @@
 # Phase 5.3 — Recommendation Engine Empirical Evaluation & Ablation Study
 
-**Author:** RETH CHAN RITH (E2) — Bachelor of Computer Science, RUPP  
+**Author:** RETH CHAN RITH (E2) —  
 **Advisor:** Sopheak  
 **Date:** 2026-10-24  
 **Status:** Evaluation Record  
