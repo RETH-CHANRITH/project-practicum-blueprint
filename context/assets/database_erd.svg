@@ -1,0 +1,609 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1660 1060" width="1660" height="1060">
+<defs>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap');
+    text { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', Menlo, Consolas, monospace; }
+  </style>
+</defs>
+<rect width="1660" height="1060" fill="#FFFFFF" />
+<!-- Header Banner -->
+<g transform="translate(40, 24)">
+  <text x="0" y="24" font-size="22" font-weight="700" fill="#0F172A">JobMatch Cambodia — Database ERD</text>
+  <rect x="415" y="6" width="200" height="22" rx="4" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1" />
+  <text x="425" y="21" font-size="10.5" font-weight="600" fill="#1D4ED8" class="mono">POSTGRESQL RELATIONAL SCHEMA</text>
+  
+  <text x="1580" y="23" font-size="12" font-weight="500" fill="#64748B" text-anchor="end">10 Tables · 93 Columns · 10 Foreign Key Relationships · 1 Soft Reference</text>
+</g>
+<!-- Relationships & Connector Lines Layer -->
+<g stroke="#334155" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<!-- users 1:1 profiles -->
+<path d="M 270 128.0 L 295 128.0 L 295 345.0 L 270 345.0" />
+<line x1="275" y1="122.0" x2="275" y2="134.0" /><line x1="281" y1="122.0" x2="281" y2="134.0" />
+<line x1="275" y1="339.0" x2="275" y2="351.0" /><line x1="281" y1="339.0" x2="281" y2="351.0" />
+<!-- users.email soft link email_otps.email -->
+<path d="M 40 150.0 L 18 150.0 L 18 630.0 L 40 630.0" stroke-dasharray="5,4" stroke="#64748B" />
+<!-- users 1:N saved_jobs -->
+<path d="M 270 128.0 L 315 128.0 L 315 575.0 L 970 575.0" />
+<line x1="279" y1="122.0" x2="279" y2="134.0" /><line x1="285" y1="122.0" x2="285" y2="134.0" />
+<path d="M 958 568.0 L 970 575.0 L 958 582.0 M 970 575.0 L 958 575.0" />
+<!-- profiles 1:N profile_skills -->
+<path d="M 270 323.0 L 305 323.0 L 305 408.0 L 340 408.0" />
+<line x1="275" y1="317.0" x2="275" y2="329.0" /><line x1="281" y1="317.0" x2="281" y2="329.0" />
+<path d="M 328 401.0 L 340 408.0 L 328 415.0 M 340 408.0 L 328 408.0" />
+<!-- skill_categories 1:N skills -->
+<path d="M 765.0 293 L 765.0 387" />
+<line x1="759.0" y1="300" x2="771.0" y2="300" /><line x1="759.0" y1="306" x2="771.0" y2="306" />
+<path d="M 758.0 375 L 765.0 387 L 772.0 375 M 765.0 387 L 765.0 375" />
+<!-- skills 1:N profile_skills (Straight) -->
+<path d="M 640 430.0 L 560 430.0" />
+<line x1="627" y1="424.0" x2="627" y2="436.0" /><line x1="633" y1="424.0" x2="633" y2="436.0" />
+<path d="M 572 423.0 L 560 430.0 L 572 437.0 M 560 430.0 L 572 430.0" />
+<!-- skills 1:N job_skills (Straight) -->
+<path d="M 890 430.0 L 970 430.0" />
+<line x1="897" y1="424.0" x2="897" y2="436.0" /><line x1="903" y1="424.0" x2="903" y2="436.0" />
+<path d="M 958 423.0 L 970 430.0 L 958 437.0 M 970 430.0 L 958 430.0" />
+<!-- job_listings 1:N job_skills -->
+<path d="M 1290 128.0 L 1235 128.0 L 1235 408.0 L 1210 408.0" />
+<line x1="1277" y1="122.0" x2="1277" y2="134.0" /><line x1="1283" y1="122.0" x2="1283" y2="134.0" />
+<path d="M 1222 401.0 L 1210 408.0 L 1222 415.0 M 1210 408.0 L 1222 408.0" />
+<!-- sources 1:N job_listings -->
+<path d="M 1210 718.0 L 1250 718.0 L 1250 150.0 L 1290 150.0" />
+<line x1="1217" y1="712.0" x2="1217" y2="724.0" /><line x1="1223" y1="712.0" x2="1223" y2="724.0" />
+<path d="M 1278 143.0 L 1290 150.0 L 1278 157.0 M 1290 150.0 L 1278 150.0" />
+<!-- job_listings 1:N saved_jobs -->
+<path d="M 1290 128.0 L 1265 128.0 L 1265 597.0 L 1210 597.0" />
+<path d="M 1222 590.0 L 1210 597.0 L 1222 604.0 M 1210 597.0 L 1222 597.0" />
+<!-- job_listings self-reference loop -->
+<path d="M 1560 128.0 L 1610 128.0 L 1610 678.0 L 1560 678.0" />
+<line x1="1567" y1="122.0" x2="1567" y2="134.0" /><line x1="1573" y1="122.0" x2="1573" y2="134.0" />
+<path d="M 1572 671.0 L 1560 678.0 L 1572 685.0 M 1560 678.0 L 1572 678.0" />
+</g>
+<!-- Table: USERS -->
+<g id="table-users">
+<rect x="40" y="85" width="230" height="164" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 40 91 Q 40 85 46 85 L 264 85 Q 270 85 270 91 L 270 117 L 40 117 Z" fill="#1E3A8A" />
+<text x="50" y="106" font-size="12" font-weight="700" fill="#FFFFFF">USERS</text>
+<text x="260" y="106" font-size="11" font-weight="500" fill="#BFDBFE" text-anchor="end" class="mono">6 cols</text>
+<rect x="40" y="117" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="117" x2="270" y2="117" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="132" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="122" y="132" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="238" y="120" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="250" y="131" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="40" y="139" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="139" x2="270" y2="139" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="154" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="154" font-size="11.5" font-weight="700" fill="#0F766E">email</text>
+<rect x="238" y="142" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="250" y="153" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="40" y="161" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="161" x2="270" y2="161" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="176" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="176" font-size="11.5" font-weight="400" fill="#0F172A">password_hash</text>
+<rect x="40" y="183" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="183" x2="270" y2="183" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="198" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="198" font-size="11.5" font-weight="400" fill="#0F172A">role</text>
+<rect x="40" y="205" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="205" x2="270" y2="205" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="220" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="220" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="40" y="227" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="227" x2="270" y2="227" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="242" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="242" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: PROFILES -->
+<g id="table-profiles">
+<rect x="40" y="280" width="230" height="252" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 40 286 Q 40 280 46 280 L 264 280 Q 270 280 270 286 L 270 312 L 40 312 Z" fill="#1E3A8A" />
+<text x="50" y="301" font-size="12" font-weight="700" fill="#FFFFFF">PROFILES</text>
+<text x="260" y="301" font-size="11" font-weight="500" fill="#BFDBFE" text-anchor="end" class="mono">10 cols</text>
+<rect x="40" y="312" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="312" x2="270" y2="312" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="327" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="122" y="327" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="238" y="315" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="250" y="326" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="40" y="334" width="230" height="22" fill="#FFF1F2" />
+<line x1="40" y1="334" x2="270" y2="334" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="349" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="122" y="349" font-size="11.5" font-weight="700" fill="#BE185D">user_id</text>
+<rect x="238" y="337" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="250" y="348" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="40" y="356" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="356" x2="270" y2="356" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="371" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="371" font-size="11.5" font-weight="400" fill="#0F172A">full_name</text>
+<rect x="40" y="378" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="378" x2="270" y2="378" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="393" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="393" font-size="11.5" font-weight="400" fill="#0F172A">education</text>
+<rect x="40" y="400" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="400" x2="270" y2="400" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="415" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="415" font-size="11.5" font-weight="400" fill="#0F172A">experience_level</text>
+<rect x="40" y="422" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="422" x2="270" y2="422" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="437" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="437" font-size="11.5" font-weight="400" fill="#0F172A">preferred_role</text>
+<rect x="40" y="444" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="444" x2="270" y2="444" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="459" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="459" font-size="11.5" font-weight="400" fill="#0F172A">preferred_location</text>
+<rect x="40" y="466" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="466" x2="270" y2="466" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="481" font-size="11" fill="#64748B" class="mono">numeric</text>
+<text x="122" y="481" font-size="11.5" font-weight="400" fill="#0F172A">expected_salary</text>
+<rect x="40" y="488" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="488" x2="270" y2="488" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="503" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="503" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="40" y="510" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="510" x2="270" y2="510" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="525" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="525" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: EMAIL_OTPS -->
+<g id="table-email_otps">
+<rect x="40" y="565" width="230" height="186" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 40 571 Q 40 565 46 565 L 264 565 Q 270 565 270 571 L 270 597 L 40 597 Z" fill="#1E3A8A" />
+<text x="50" y="586" font-size="12" font-weight="700" fill="#FFFFFF">EMAIL_OTPS</text>
+<text x="260" y="586" font-size="11" font-weight="500" fill="#BFDBFE" text-anchor="end" class="mono">7 cols</text>
+<rect x="40" y="597" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="597" x2="270" y2="597" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="612" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="122" y="612" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="238" y="600" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="250" y="611" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="40" y="619" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="619" x2="270" y2="619" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="634" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="634" font-size="11.5" font-weight="400" fill="#0F172A">email</text>
+<rect x="40" y="641" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="641" x2="270" y2="641" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="656" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="656" font-size="11.5" font-weight="400" fill="#0F172A">code</text>
+<rect x="40" y="663" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="663" x2="270" y2="663" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="678" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="122" y="678" font-size="11.5" font-weight="400" fill="#0F172A">purpose</text>
+<rect x="40" y="685" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="685" x2="270" y2="685" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="700" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="700" font-size="11.5" font-weight="400" fill="#0F172A">expires_at</text>
+<rect x="40" y="707" width="230" height="22" fill="#F8FAFC" />
+<line x1="40" y1="707" x2="270" y2="707" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="722" font-size="11" fill="#64748B" class="mono">boolean</text>
+<text x="122" y="722" font-size="11.5" font-weight="400" fill="#0F172A">is_used</text>
+<rect x="40" y="729" width="230" height="22" fill="#FFFFFF" />
+<line x1="40" y1="729" x2="270" y2="729" stroke="#F1F5F9" stroke-width="1" />
+<text x="50" y="744" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="122" y="744" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+</g>
+<!-- Table: PROFILE_SKILLS -->
+<g id="table-profile_skills">
+<rect x="340" y="343" width="220" height="142" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 340 349 Q 340 343 346 343 L 554 343 Q 560 343 560 349 L 560 375 L 340 375 Z" fill="#0F766E" />
+<text x="350" y="364" font-size="12" font-weight="700" fill="#FFFFFF">PROFILE_SKILLS</text>
+<text x="550" y="364" font-size="11" font-weight="500" fill="#99F6E4" text-anchor="end" class="mono">5 cols</text>
+<rect x="340" y="375" width="220" height="22" fill="#FFFFFF" />
+<line x1="340" y1="375" x2="560" y2="375" stroke="#F1F5F9" stroke-width="1" />
+<text x="350" y="390" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="422" y="390" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="528" y="378" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="540" y="389" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="340" y="397" width="220" height="22" fill="#FFF1F2" />
+<line x1="340" y1="397" x2="560" y2="397" stroke="#F1F5F9" stroke-width="1" />
+<text x="350" y="412" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="422" y="412" font-size="11.5" font-weight="700" fill="#BE185D">profile_id</text>
+<rect x="528" y="400" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="540" y="411" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="340" y="419" width="220" height="22" fill="#FFF1F2" />
+<line x1="340" y1="419" x2="560" y2="419" stroke="#F1F5F9" stroke-width="1" />
+<text x="350" y="434" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="422" y="434" font-size="11.5" font-weight="700" fill="#BE185D">skill_id</text>
+<rect x="528" y="422" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="540" y="433" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="340" y="441" width="220" height="22" fill="#F8FAFC" />
+<line x1="340" y1="441" x2="560" y2="441" stroke="#F1F5F9" stroke-width="1" />
+<text x="350" y="456" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="422" y="456" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="340" y="463" width="220" height="22" fill="#FFFFFF" />
+<line x1="340" y1="463" x2="560" y2="463" stroke="#F1F5F9" stroke-width="1" />
+<text x="350" y="478" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="422" y="478" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: SKILL_CATEGORIES -->
+<g id="table-skill_categories">
+<rect x="640" y="85" width="250" height="208" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 640 91 Q 640 85 646 85 L 884 85 Q 890 85 890 91 L 890 117 L 640 117 Z" fill="#0F766E" />
+<text x="650" y="106" font-size="12" font-weight="700" fill="#FFFFFF">SKILL_CATEGORIES</text>
+<text x="880" y="106" font-size="11" font-weight="500" fill="#99F6E4" text-anchor="end" class="mono">8 cols</text>
+<rect x="640" y="117" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="117" x2="890" y2="117" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="132" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="722" y="132" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="858" y="120" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="870" y="131" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="640" y="139" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="139" x2="890" y2="139" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="154" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="154" font-size="11.5" font-weight="700" fill="#0F766E">name</text>
+<rect x="858" y="142" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="870" y="153" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="640" y="161" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="161" x2="890" y2="161" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="176" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="176" font-size="11.5" font-weight="700" fill="#0F766E">code</text>
+<rect x="858" y="164" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="870" y="175" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="640" y="183" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="183" x2="890" y2="183" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="198" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="198" font-size="11.5" font-weight="400" fill="#0F172A">icon</text>
+<rect x="640" y="205" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="205" x2="890" y2="205" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="220" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="220" font-size="11.5" font-weight="400" fill="#0F172A">description</text>
+<rect x="640" y="227" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="227" x2="890" y2="227" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="242" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="722" y="242" font-size="11.5" font-weight="400" fill="#0F172A">display_order</text>
+<rect x="640" y="249" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="249" x2="890" y2="249" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="264" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="722" y="264" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="640" y="271" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="271" x2="890" y2="271" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="286" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="722" y="286" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: SKILLS -->
+<g id="table-skills">
+<rect x="640" y="387" width="250" height="164" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 640 393 Q 640 387 646 387 L 884 387 Q 890 387 890 393 L 890 419 L 640 419 Z" fill="#0F766E" />
+<text x="650" y="408" font-size="12" font-weight="700" fill="#FFFFFF">SKILLS</text>
+<text x="880" y="408" font-size="11" font-weight="500" fill="#99F6E4" text-anchor="end" class="mono">6 cols</text>
+<rect x="640" y="419" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="419" x2="890" y2="419" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="434" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="722" y="434" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="858" y="422" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="870" y="433" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="640" y="441" width="250" height="22" fill="#FFF1F2" />
+<line x1="640" y1="441" x2="890" y2="441" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="456" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="722" y="456" font-size="11.5" font-weight="700" fill="#BE185D">category_id</text>
+<rect x="858" y="444" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="870" y="455" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="640" y="463" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="463" x2="890" y2="463" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="478" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="478" font-size="11.5" font-weight="700" fill="#0F766E">name</text>
+<rect x="858" y="466" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="870" y="477" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="640" y="485" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="485" x2="890" y2="485" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="500" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="722" y="500" font-size="11.5" font-weight="400" fill="#0F172A">category</text>
+<rect x="640" y="507" width="250" height="22" fill="#FFFFFF" />
+<line x1="640" y1="507" x2="890" y2="507" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="522" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="722" y="522" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="640" y="529" width="250" height="22" fill="#F8FAFC" />
+<line x1="640" y1="529" x2="890" y2="529" stroke="#F1F5F9" stroke-width="1" />
+<text x="650" y="544" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="722" y="544" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: JOB_SKILLS -->
+<g id="table-job_skills">
+<rect x="970" y="343" width="240" height="142" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 970 349 Q 970 343 976 343 L 1204 343 Q 1210 343 1210 349 L 1210 375 L 970 375 Z" fill="#0F766E" />
+<text x="980" y="364" font-size="12" font-weight="700" fill="#FFFFFF">JOB_SKILLS</text>
+<text x="1200" y="364" font-size="11" font-weight="500" fill="#99F6E4" text-anchor="end" class="mono">5 cols</text>
+<rect x="970" y="375" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="375" x2="1210" y2="375" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="390" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="390" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="1178" y="378" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="1190" y="389" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="970" y="397" width="240" height="22" fill="#FFF1F2" />
+<line x1="970" y1="397" x2="1210" y2="397" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="412" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="412" font-size="11.5" font-weight="700" fill="#BE185D">job_id</text>
+<rect x="1178" y="400" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1190" y="411" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="970" y="419" width="240" height="22" fill="#FFF1F2" />
+<line x1="970" y1="419" x2="1210" y2="419" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="434" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="434" font-size="11.5" font-weight="700" fill="#BE185D">skill_id</text>
+<rect x="1178" y="422" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1190" y="433" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="970" y="441" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="441" x2="1210" y2="441" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="456" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="456" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="970" y="463" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="463" x2="1210" y2="463" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="478" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="478" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: SAVED_JOBS -->
+<g id="table-saved_jobs">
+<rect x="970" y="510" width="240" height="142" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 970 516 Q 970 510 976 510 L 1204 510 Q 1210 510 1210 516 L 1210 542 L 970 542 Z" fill="#1E3A8A" />
+<text x="980" y="531" font-size="12" font-weight="700" fill="#FFFFFF">SAVED_JOBS</text>
+<text x="1200" y="531" font-size="11" font-weight="500" fill="#BFDBFE" text-anchor="end" class="mono">5 cols</text>
+<rect x="970" y="542" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="542" x2="1210" y2="542" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="557" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="557" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="1178" y="545" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="1190" y="556" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="970" y="564" width="240" height="22" fill="#FFF1F2" />
+<line x1="970" y1="564" x2="1210" y2="564" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="579" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="579" font-size="11.5" font-weight="700" fill="#BE185D">user_id</text>
+<rect x="1178" y="567" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1190" y="578" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="970" y="586" width="240" height="22" fill="#FFF1F2" />
+<line x1="970" y1="586" x2="1210" y2="586" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="601" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="601" font-size="11.5" font-weight="700" fill="#BE185D">job_id</text>
+<rect x="1178" y="589" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1190" y="600" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="970" y="608" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="608" x2="1210" y2="608" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="623" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="623" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="970" y="630" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="630" x2="1210" y2="630" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="645" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="645" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: SOURCES (PLATFORMS) -->
+<g id="table-sources">
+<rect x="970" y="675" width="240" height="274" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 970 681 Q 970 675 976 675 L 1204 675 Q 1210 675 1210 681 L 1210 707 L 970 707 Z" fill="#B45309" />
+<text x="980" y="696" font-size="12" font-weight="700" fill="#FFFFFF">SOURCES (PLATFORMS)</text>
+<text x="1200" y="696" font-size="11" font-weight="500" fill="#FDE68A" text-anchor="end" class="mono">11 cols</text>
+<rect x="970" y="707" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="707" x2="1210" y2="707" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="722" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="722" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="1178" y="710" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="1190" y="721" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="970" y="729" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="729" x2="1210" y2="729" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="744" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1052" y="744" font-size="11.5" font-weight="700" fill="#0F766E">name</text>
+<rect x="1178" y="732" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="1190" y="743" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="970" y="751" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="751" x2="1210" y2="751" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="766" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1052" y="766" font-size="11.5" font-weight="700" fill="#0F766E">code</text>
+<rect x="1178" y="754" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="1190" y="765" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="970" y="773" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="773" x2="1210" y2="773" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="788" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1052" y="788" font-size="11.5" font-weight="400" fill="#0F172A">platform_type</text>
+<rect x="970" y="795" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="795" x2="1210" y2="795" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="810" font-size="11" fill="#64748B" class="mono">text</text>
+<text x="1052" y="810" font-size="11.5" font-weight="400" fill="#0F172A">url</text>
+<rect x="970" y="817" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="817" x2="1210" y2="817" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="832" font-size="11" fill="#64748B" class="mono">text</text>
+<text x="1052" y="832" font-size="11.5" font-weight="400" fill="#0F172A">logo_url</text>
+<rect x="970" y="839" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="839" x2="1210" y2="839" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="854" font-size="11" fill="#64748B" class="mono">boolean</text>
+<text x="1052" y="854" font-size="11.5" font-weight="400" fill="#0F172A">is_active</text>
+<rect x="970" y="861" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="861" x2="1210" y2="861" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="876" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1052" y="876" font-size="11.5" font-weight="400" fill="#0F172A">scrape_interval_minutes</text>
+<rect x="970" y="883" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="883" x2="1210" y2="883" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="898" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="898" font-size="11.5" font-weight="400" fill="#0F172A">last_scraped_at</text>
+<rect x="970" y="905" width="240" height="22" fill="#F8FAFC" />
+<line x1="970" y1="905" x2="1210" y2="905" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="920" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="920" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="970" y="927" width="240" height="22" fill="#FFFFFF" />
+<line x1="970" y1="927" x2="1210" y2="927" stroke="#F1F5F9" stroke-width="1" />
+<text x="980" y="942" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1052" y="942" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Table: JOB_LISTINGS (30 COLUMNS) -->
+<g id="table-job_listings">
+<rect x="1290" y="85" width="270" height="692" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<path d="M 1290 91 Q 1290 85 1296 85 L 1554 85 Q 1560 85 1560 91 L 1560 117 L 1290 117 Z" fill="#B45309" />
+<text x="1300" y="106" font-size="12" font-weight="700" fill="#FFFFFF">JOB_LISTINGS (30 COLUMNS)</text>
+<text x="1550" y="106" font-size="11" font-weight="500" fill="#FDE68A" text-anchor="end" class="mono">30 cols</text>
+<rect x="1290" y="117" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="117" x2="1560" y2="117" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="132" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1372" y="132" font-size="11.5" font-weight="700" fill="#1D4ED8">id</text>
+<rect x="1528" y="120" width="24" height="15" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+<text x="1540" y="131" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+<rect x="1290" y="139" width="270" height="22" fill="#FFF1F2" />
+<line x1="1290" y1="139" x2="1560" y2="139" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="154" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1372" y="154" font-size="11.5" font-weight="700" fill="#BE185D">source_id</text>
+<rect x="1528" y="142" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1540" y="153" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="1290" y="161" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="161" x2="1560" y2="161" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="176" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="176" font-size="11.5" font-weight="400" fill="#0F172A">title</text>
+<rect x="1290" y="183" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="183" x2="1560" y2="183" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="198" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="198" font-size="11.5" font-weight="400" fill="#0F172A">company</text>
+<rect x="1290" y="205" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="205" x2="1560" y2="205" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="220" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="220" font-size="11.5" font-weight="400" fill="#0F172A">location</text>
+<rect x="1290" y="227" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="227" x2="1560" y2="227" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="242" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="242" font-size="11.5" font-weight="400" fill="#0F172A">experience_level</text>
+<rect x="1290" y="249" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="249" x2="1560" y2="249" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="264" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="264" font-size="11.5" font-weight="400" fill="#0F172A">job_type</text>
+<rect x="1290" y="271" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="271" x2="1560" y2="271" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="286" font-size="11" fill="#64748B" class="mono">numeric</text>
+<text x="1372" y="286" font-size="11.5" font-weight="400" fill="#0F172A">salary_min</text>
+<rect x="1290" y="293" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="293" x2="1560" y2="293" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="308" font-size="11" fill="#64748B" class="mono">numeric</text>
+<text x="1372" y="308" font-size="11.5" font-weight="400" fill="#0F172A">salary_max</text>
+<rect x="1290" y="315" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="315" x2="1560" y2="315" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="330" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="330" font-size="11.5" font-weight="400" fill="#0F172A">salary_currency</text>
+<rect x="1290" y="337" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="337" x2="1560" y2="337" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="352" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="352" font-size="11.5" font-weight="400" fill="#0F172A">salary_period</text>
+<rect x="1290" y="359" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="359" x2="1560" y2="359" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="374" font-size="11" fill="#64748B" class="mono">boolean</text>
+<text x="1372" y="374" font-size="11.5" font-weight="400" fill="#0F172A">is_negotiable</text>
+<rect x="1290" y="381" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="381" x2="1560" y2="381" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="396" font-size="11" fill="#64748B" class="mono">text</text>
+<text x="1372" y="396" font-size="11.5" font-weight="400" fill="#0F172A">description</text>
+<rect x="1290" y="403" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="403" x2="1560" y2="403" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="418" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="418" font-size="11.5" font-weight="400" fill="#0F172A">source</text>
+<rect x="1290" y="425" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="425" x2="1560" y2="425" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="440" font-size="11" fill="#64748B" class="mono">text</text>
+<text x="1372" y="440" font-size="11.5" font-weight="700" fill="#0F766E">source_url</text>
+<rect x="1528" y="428" width="24" height="15" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+<text x="1540" y="439" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+<rect x="1290" y="447" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="447" x2="1560" y2="447" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="462" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="462" font-size="11.5" font-weight="400" fill="#0F172A">company_url</text>
+<rect x="1290" y="469" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="469" x2="1560" y2="469" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="484" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="484" font-size="11.5" font-weight="400" fill="#0F172A">application_url</text>
+<rect x="1290" y="491" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="491" x2="1560" y2="491" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="506" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="506" font-size="11.5" font-weight="400" fill="#0F172A">work_arrangement</text>
+<rect x="1290" y="513" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="513" x2="1560" y2="513" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="528" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="528" font-size="11.5" font-weight="400" fill="#0F172A">job_category</text>
+<rect x="1290" y="535" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="535" x2="1560" y2="535" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="550" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="550" font-size="11.5" font-weight="400" fill="#0F172A">job_level</text>
+<rect x="1290" y="557" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="557" x2="1560" y2="557" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="572" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="572" font-size="11.5" font-weight="400" fill="#0F172A">classification_source</text>
+<rect x="1290" y="579" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="579" x2="1560" y2="579" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="594" font-size="11" fill="#64748B" class="mono">date</text>
+<text x="1372" y="594" font-size="11.5" font-weight="400" fill="#0F172A">posted_at</text>
+<rect x="1290" y="601" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="601" x2="1560" y2="601" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="616" font-size="11" fill="#64748B" class="mono">date</text>
+<text x="1372" y="616" font-size="11.5" font-weight="400" fill="#0F172A">deadline</text>
+<rect x="1290" y="623" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="623" x2="1560" y2="623" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="638" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1372" y="638" font-size="11.5" font-weight="400" fill="#0F172A">scraped_at</text>
+<rect x="1290" y="645" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="645" x2="1560" y2="645" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="660" font-size="11" fill="#64748B" class="mono">timestamptz</text>
+<text x="1372" y="660" font-size="11.5" font-weight="400" fill="#0F172A">last_seen_at</text>
+<rect x="1290" y="667" width="270" height="22" fill="#FFF1F2" />
+<line x1="1290" y1="667" x2="1560" y2="667" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="682" font-size="11" fill="#64748B" class="mono">int</text>
+<text x="1372" y="682" font-size="11.5" font-weight="700" fill="#BE185D">duplicate_of</text>
+<rect x="1528" y="670" width="24" height="15" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+<text x="1540" y="681" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+<rect x="1290" y="689" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="689" x2="1560" y2="689" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="704" font-size="11" fill="#64748B" class="mono">string</text>
+<text x="1372" y="704" font-size="11.5" font-weight="400" fill="#0F172A">dedup_hash</text>
+<rect x="1290" y="711" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="711" x2="1560" y2="711" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="726" font-size="11" fill="#64748B" class="mono">boolean</text>
+<text x="1372" y="726" font-size="11.5" font-weight="400" fill="#0F172A">is_active</text>
+<rect x="1290" y="733" width="270" height="22" fill="#FFFFFF" />
+<line x1="1290" y1="733" x2="1560" y2="733" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="748" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1372" y="748" font-size="11.5" font-weight="400" fill="#0F172A">created_at</text>
+<rect x="1290" y="755" width="270" height="22" fill="#F8FAFC" />
+<line x1="1290" y1="755" x2="1560" y2="755" stroke="#F1F5F9" stroke-width="1" />
+<text x="1300" y="770" font-size="11" fill="#64748B" class="mono">timestamp</text>
+<text x="1372" y="770" font-size="11.5" font-weight="400" fill="#0F172A">updated_at</text>
+</g>
+<!-- Bottom Legend & Specifications -->
+<g transform="translate(40, 995)">
+  <rect x="0" y="0" width="1580" height="42" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+  
+  <!-- Keys -->
+  <g transform="translate(20, 13)">
+    <rect x="0" y="0" width="24" height="16" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="0.75" />
+    <text x="12" y="12" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle" class="mono">PK</text>
+    <text x="30" y="12" font-size="11.5" font-weight="500" fill="#334155">Primary Key</text>
+    
+    <rect x="120" y="0" width="24" height="16" rx="3" fill="#FDF2F8" stroke="#FBCFE8" stroke-width="0.75" />
+    <text x="132" y="12" font-size="9" font-weight="700" fill="#BE185D" text-anchor="middle" class="mono">FK</text>
+    <text x="150" y="12" font-size="11.5" font-weight="500" fill="#334155">Foreign Key</text>
+
+    <rect x="238" y="0" width="24" height="16" rx="3" fill="#F0FDFA" stroke="#99F6E4" stroke-width="0.75" />
+    <text x="250" y="12" font-size="9" font-weight="700" fill="#0F766E" text-anchor="middle" class="mono">UK</text>
+    <text x="268" y="12" font-size="11.5" font-weight="500" fill="#334155">Unique Key</text>
+  </g>
+
+  <!-- Markers -->
+  <g transform="translate(430, 13)">
+    <g stroke="#334155" stroke-width="1.75" fill="none">
+      <line x1="0" y1="8" x2="25" y2="8" />
+      <line x1="8" y1="2" x2="8" y2="14" /><line x1="14" y1="2" x2="14" y2="14" />
+    </g>
+    <text x="34" y="12" font-size="11.5" font-weight="500" fill="#334155">Exactly One (1)</text>
+
+    <g transform="translate(145, 0)" stroke="#334155" stroke-width="1.75" fill="none">
+      <line x1="0" y1="8" x2="25" y2="8" />
+      <path d="M 15 2 L 25 8 L 15 14" />
+    </g>
+    <text x="178" y="12" font-size="11.5" font-weight="500" fill="#334155">Crow's Foot (Many / N)</text>
+
+    <g transform="translate(345, 0)" stroke="#64748B" stroke-width="1.75" fill="none">
+      <line x1="0" y1="8" x2="25" y2="8" stroke-dasharray="4,3" />
+    </g>
+    <text x="378" y="12" font-size="11.5" font-weight="500" fill="#334155">Soft Link (No DB FK)</text>
+  </g>
+
+  <!-- Groups -->
+  <g transform="translate(1050, 13)">
+    <rect x="0" y="2" width="12" height="12" rx="2" fill="#1E3A8A" />
+    <text x="18" y="12" font-size="11.5" font-weight="500" fill="#334155">Accounts &amp; Activity</text>
+
+    <rect x="145" y="2" width="12" height="12" rx="2" fill="#0F766E" />
+    <text x="163" y="12" font-size="11.5" font-weight="500" fill="#334155">Skills Taxonomy</text>
+
+    <rect x="275" y="2" width="12" height="12" rx="2" fill="#B45309" />
+    <text x="293" y="12" font-size="11.5" font-weight="500" fill="#334155">Jobs &amp; Platforms</text>
+  </g>
+</g>
+</svg>
