@@ -59,12 +59,17 @@ def normalize_text_for_matching(text: Optional[str]) -> str:
 
 
 def normalize_company_name(comp: Optional[str]) -> str:
-    """Strip business suffixes and recruitment phrases from company name."""
+    """Strip business suffixes, country qualifiers, and recruitment phrases from company name."""
     if not comp:
         return ""
     c = normalize_text_for_matching(comp)
     c = re.sub(r'\s*(?:is\s+seeking|is\s+looking\s+for|looking\s+for|needs|is\s+hiring|company:|employer:).*$', '', c, flags=re.IGNORECASE)
-    c = re.sub(r'\b(?:co\.?,?\s*ltd|plc|bank\s+plc|inc\.|corp\.?|llc|group)\b', '', c, flags=re.IGNORECASE)
+    # Strip country qualifiers like (cambodia) or cambodia
+    c = re.sub(r'\b(?:cambodia|khmer)\b', '', c, flags=re.IGNORECASE)
+    # Strip corporate legal suffixes, preserving brand words like Bank/Group/Cement
+    c = re.sub(r'\b(?:co\.?,?\s*ltd|plc|inc\.|corp\.?|llc|ltd)\b', '', c, flags=re.IGNORECASE)
+    # Clean up trailing/embedded punctuation
+    c = re.sub(r'[\.,\-_/]', ' ', c)
     c = re.sub(r'\s+', ' ', c).strip()
     return c
 
@@ -299,11 +304,30 @@ def save_job_with_dedup(
         duplicate_of_id = main_match.id
         merge_into_main_job(db=db, main_job=main_match, incoming=job_data)
 
+    # 3.5 Resolve canonical company entity (3NF)
+    company_id = job_data.get("company_id")
+    if not company_id and company:
+        try:
+            from app.services.company_resolver import resolve_company
+            resolved_comp, _ = resolve_company(
+                db=db,
+                raw_company_name=company,
+                source_id=job_data.get("source_id"),
+                logo_url=job_data.get("company_logo_url"),
+                website_url=job_data.get("company_url"),
+                auto_create=True
+            )
+            if resolved_comp:
+                company_id = resolved_comp.id
+        except Exception:
+            company_id = None
+
     # 4. Insert new record
     new_job = JobListing(
         title=title,
         raw_title=job_data.get("raw_title") or title,
         company=company,
+        company_id=company_id,
         company_url=job_data.get("company_url"),
         company_logo_url=job_data.get("company_logo_url"),
         location=job_data.get("location") or "Phnom Penh",

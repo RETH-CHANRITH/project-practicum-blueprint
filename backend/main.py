@@ -54,11 +54,13 @@ from app.api.sources import router as sources_router
 from app.api.saved_jobs import router as saved_jobs_router
 from app.api.recommendations import router as recommendations_router
 from app.api.admin import router as admin_router
+from app.api.companies import router as companies_router
 
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(profile_router, prefix=settings.API_V1_STR)
 app.include_router(skills_router, prefix=settings.API_V1_STR)
 app.include_router(sources_router, prefix=settings.API_V1_STR)
+app.include_router(companies_router, prefix=settings.API_V1_STR)
 app.include_router(jobs_router, prefix=settings.API_V1_STR)
 app.include_router(saved_jobs_router, prefix=settings.API_V1_STR)
 app.include_router(recommendations_router, prefix=settings.API_V1_STR)

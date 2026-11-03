@@ -2,7 +2,7 @@
 
 **Objective:** Design the data model your features need: every table, column, constraint and relationship, decided before any migration is written.
 
-**Status:** Submitted · **Last updated:** 2026-10-18
+**Status:** Submitted · **Last updated:** 2026-11-04
 
 ## Done When
 
@@ -30,6 +30,7 @@ erDiagram
     skills ||--o{ profile_skills : referenced_in
     skills ||--o{ job_skills : required_in
     sources ||--o{ job_listings : provides
+    companies ||--o{ job_listings : publishes
     job_listings ||--o{ job_skills : requires
     job_listings ||--o{ saved_jobs : saved_by
 
@@ -54,6 +55,21 @@ erDiagram
         boolean is_active
         int scrape_interval_minutes
         timestamp last_scraped_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    companies {
+        int id PK
+        string name
+        string normalized_name UK
+        string slug UK
+        text logo_url
+        text website_url
+        string industry
+        string headquarters
+        text description
+        boolean is_verified
         timestamp created_at
         timestamp updated_at
     }
@@ -100,6 +116,7 @@ erDiagram
     job_listings {
         int id PK
         int source_id FK
+        int company_id FK
         string title
         string raw_title
         string company
@@ -309,6 +326,31 @@ Master registry of recruitment sources and job aggregation channels (Web portals
 
 ---
 
+### Table: `companies`
+Stores canonical hiring organizations and employers (3NF Database Normalization). Connects 1:N with `job_listings`.
+
+**Purpose & Function:**
+1. **Centralized Brand Identity:** Eliminates duplicating company descriptions, logos, and websites across hundreds of job listings from the same employer.
+2. **Company Profile & Vacancy Aggregation:** Powers company detail screens and filters (`GET /api/v1/companies/{id}`) to list all open positions from ABA Bank, Smart Axiata, Wing Bank, etc.
+3. **Employer Verification:** Distinguishes verified Cambodian employers (`is_verified = TRUE`) from unverified scraper text to prevent job scams.
+
+| Column | Data type | Constraints | Nullable | Description |
+|---|---|---|---|---|
+| id | integer | PRIMARY KEY, SERIAL | No | Unique company identifier |
+| name | varchar(200) | INDEX | No | Canonical display name (e.g., 'ABA Bank', 'Smart Axiata') |
+| normalized_name | varchar(200) | UNIQUE, INDEX | No | Lowercase sanitized token for $O(1)$ duplicate lookup ('aba bank') |
+| slug | varchar(220) | UNIQUE, INDEX | No | URL-friendly slug for routing (e.g., 'aba-bank') |
+| logo_url | text | | Yes | CDN or static URL for official company logo image |
+| website_url | text | | Yes | Official corporate homepage URL |
+| industry | varchar(100) | INDEX | Yes | Industry sector ('Banking & Finance', 'Information Technology') |
+| headquarters | varchar(150) | DEFAULT 'Phnom Penh' | No | Main corporate office location |
+| description | text | | Yes | Company overview, culture, and mission summary |
+| is_verified | boolean | DEFAULT false, INDEX | No | Anti-impersonation flag; true if employer is verified |
+| created_at | timestamp | DEFAULT now() | No | Creation timestamp |
+| updated_at | timestamp | DEFAULT now() | No | Last update timestamp |
+
+---
+
 ### Table: `job_listings`
 Stores clean, normalized job vacancies aggregated from external sources.
 
@@ -316,9 +358,10 @@ Stores clean, normalized job vacancies aggregated from external sources.
 |---|---|---|---|---|
 | id | integer | PRIMARY KEY, SERIAL | No | Unique job listing identifier |
 | source_id | integer | FK → sources.id ON DELETE SET NULL, INDEX | Yes | Foreign key reference to master recruitment source |
+| company_id | integer | FK → companies.id ON DELETE SET NULL, INDEX | Yes | Foreign key reference to canonical hiring company |
 | title | varchar(200) | | No | Normalized job title |
 | raw_title | varchar(255) | | Yes | Original uncleaned title string as published on source |
-| company | varchar(150) | | No | Verified hiring organization name |
+| company | varchar(150) | | No | Denormalized company name string for search and backward compatibility |
 | company_logo_url | text | | Yes | URL path to company branding logo image |
 | location | varchar(100) | | No | Job location (e.g. Phnom Penh, Remote) |
 | normalized_location | varchar(255) | | Yes | Standardized location identifier for geographic filtering |

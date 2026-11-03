@@ -85,11 +85,58 @@ class Source(Base):
     jobs = relationship("JobListing", back_populates="job_source")
 
 
+# -----------------------------------------------------------------------------
+# Master Companies & Company Aliases Tables (Entity Resolution & 3NF Schema)
+# -----------------------------------------------------------------------------
+class Company(Base):
+    __tablename__ = "companies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False, index=True)
+    normalized_name = Column(String(200), unique=True, nullable=False, index=True)
+    slug = Column(String(220), unique=True, nullable=False, index=True)
+    logo_url = Column(Text, nullable=True)
+    website_url = Column(Text, nullable=True)
+    industry = Column(String(100), nullable=True, index=True)
+    headquarters = Column(String(150), default="Phnom Penh", nullable=False)
+    description = Column(Text, nullable=True)
+    parent_company_id = Column(Integer, ForeignKey("companies.id", ondelete="SET NULL"), nullable=True)
+    is_verified = Column(Boolean, default=False, nullable=False, index=True)
+    verification_status = Column(String(20), default="unverified", nullable=False)
+    verification_method = Column(String(100), nullable=True)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    jobs = relationship("JobListing", back_populates="company_rel")
+    aliases = relationship("CompanyAlias", back_populates="company", cascade="all, delete-orphan")
+
+
+class CompanyAlias(Base):
+    __tablename__ = "company_aliases"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_id = Column(Integer, ForeignKey("sources.id", ondelete="SET NULL"), nullable=True, index=True)
+    alias_name = Column(String(200), nullable=False)
+    normalized_alias = Column(String(200), nullable=False, index=True)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    company = relationship("Company", back_populates="aliases")
+    source = relationship("Source")
+
+    __table_args__ = (
+        UniqueConstraint("company_id", "normalized_alias", name="uq_company_aliases_company_alias"),
+    )
+
+
 class JobListing(Base):
     __tablename__ = "job_listings"
 
     id = Column(Integer, primary_key=True, index=True)
     source_id = Column(Integer, ForeignKey("sources.id", ondelete="SET NULL"), nullable=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="SET NULL"), nullable=True, index=True)
     title = Column(String(200), nullable=False, index=True)
     company = Column(String(255), nullable=False, index=True)
     location = Column(String(255), default="Phnom Penh", nullable=False)
@@ -133,6 +180,7 @@ class JobListing(Base):
     skills = relationship("JobSkill", back_populates="job", cascade="all, delete-orphan")
     saved_by = relationship("SavedJob", back_populates="job", cascade="all, delete-orphan")
     job_source = relationship("Source", back_populates="jobs")
+    company_rel = relationship("Company", back_populates="jobs")
 
     __table_args__ = (
         UniqueConstraint("source", "source_post_id", name="uq_job_listings_source_post_id"),

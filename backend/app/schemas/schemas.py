@@ -279,3 +279,61 @@ class AdminStatsResponse(BaseModel):
     auto_scraper_status: str = "active"  # 'active', 'running', 'idle'
     last_scraped_at: Optional[str] = None
     next_scrape_in_minutes: Optional[int] = None
+
+
+# ---------------------------------------------------------
+# Company & Entity Resolution Schemas (EP-16, EP-17, EP-18)
+# ---------------------------------------------------------
+class CompanyAliasResponse(BaseModel):
+    id: int
+    alias_name: str
+    normalized_alias: str
+    is_verified: bool
+    source_id: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompanyBase(BaseModel):
+    name: str
+    logo_url: Optional[str] = None
+    website_url: Optional[str] = None
+    industry: Optional[str] = None
+    headquarters: Optional[str] = "Phnom Penh"
+    description: Optional[str] = None
+
+
+class CompanyCreate(CompanyBase):
+    pass
+
+
+class CompanyResponse(CompanyBase):
+    id: int
+    normalized_name: str
+    slug: str
+    is_verified: bool
+    verification_status: str
+    verified_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    active_jobs_count: Optional[int] = 0
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CompanyDetailResponse(CompanyResponse):
+    aliases: List[CompanyAliasResponse] = []
+
+
+class CompanyResolveRequest(BaseModel):
+    raw_name: str = Field(..., min_length=1, description="Raw company name string extracted from scraper")
+    source_id: Optional[int] = None
+
+
+class CompanyResolveResponse(BaseModel):
+    raw_name: str
+    normalized_name: str
+    resolved: bool
+    is_new: bool
+    company: Optional[CompanyResponse] = None
+

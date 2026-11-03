@@ -19,6 +19,7 @@
 | SD-2 | Authentication & authorization | Register, login, email OTP verification, token issuing, and role middleware (`user`, `admin`) | EP-02, EP-03, EP-14, EP-15 | 2026-10-23 | Done | `backend/app/api/auth.py`, `email_service.py`, `deps.py` |
 | SD-3 | Core CRUD entities | Create/read/update/delete for the primary resources: profiles, skills, jobs, bookmarks, and recruitment sources | EP-04, EP-05, EP-06, EP-07, EP-08, EP-10, EP-11, EP-12, EP-16, EP-17 | 2026-10-18 | Done | `backend/app/api/profile.py`, `jobs.py`, `skills.py`, `saved_jobs.py`, `sources.py` |
 | SD-4 | Complex business logic & AI matching | Dual-metric AI job recommendation engine (`required_skill_coverage` + `semantic_similarity` -> `ranking_score`), data cleaning pipeline, background auto-scraper, 3-tier cross-source dedup with anti-phishing protection | EP-01, EP-09, EP-13 | 2026-10-18 | Done | `backend/app/services/matching_engine.py`, `dedup_manager.py`, `importer.py`, `scheduler.py` |
+| SD-5 | Canonical Company Management & Entity Resolution | 3NF canonical `companies` and `company_aliases` tables, fuzzy/alias resolver with anti-unsafe merging, auto-linking during deduplication, endpoints EP-18 to EP-20 | EP-18, EP-19, EP-20 | 2026-11-04 | Done | `backend/app/models/models.py`, `company_resolver.py`, `api/companies.py`, `test_company_resolver.py`, `test_companies_api.py` |
 
 ## 2. Implementation Notes
 
@@ -41,7 +42,7 @@
 | Create tables & run seeds | `cd backend && python seed.py` |
 | Reset the database | `docker compose down -v && docker compose up -d db && cd backend && alembic upgrade head && python seed.py` |
 | Start the API on port 8000 | `cd backend && uvicorn main:app --reload --port 8000` |
-| Run the API test collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (70 tests) |
+| Run the API test collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (79 tests) |
 | Check health endpoint | `curl http://localhost:8000/api/v1/health` |
 
 ### Seeded Test Accounts (Local Testing Only):
