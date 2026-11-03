@@ -168,6 +168,12 @@ erDiagram
     }
 ```
 
+### Visual Production Schema & Interactive Canvas
+
+| Resource | Link / Path | Description |
+|---|---|---|
+| **Interactive Live ERD (Web Artifact)** | [Interactive ERD Canvas](https://claude.ai/artifact/L3Acd5cYvVLHfjumXQkZ3P) | Interactive schema canvas with domain color highlights, relationships, and entity grouping |
+| **Production Diagram Asset** | [database_erd.jpg](../assets/database_erd.jpg) | High-resolution 10-table visual schema diagram |
 
 ![Database ERD](../assets/database_erd.jpg)
 

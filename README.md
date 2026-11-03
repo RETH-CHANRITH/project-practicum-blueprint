@@ -40,6 +40,7 @@ Status values: Not started · In progress · Submitted · Rework needed
 |---|---|
 | Figma file | [Figma Design Canvas](https://www.figma.com/design/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1) |
 | Figma prototype | [Figma Interactive Prototype](https://www.figma.com/proto/WzpxtrgeDvPQbwbw0XwyFt/MATCH-JOB?node-id=0-1&t=hzv0ZKwELP0s4A3C-1) |
+| Interactive ERD | [Interactive Database ERD Canvas](https://claude.ai/artifact/L3Acd5cYvVLHfjumXQkZ3P) |
 | Alpha demo video | |
 | Thesis | |
 | Defense slides | |
