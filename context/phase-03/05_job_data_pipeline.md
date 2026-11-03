@@ -205,11 +205,9 @@ Instead, `merge_into_main_job()` executes an order-independent **Smart Merge Str
 
 ---
 
----
+## 5. Additional Technical Architecture & Missing Safeguards
 
-# 5. Additional Technical Architecture & Missing Safeguards
-
-## 5.1 Tier 0 — Source Identity Verification
+### 5.1 Tier 0 — Source Identity Verification
 
 Before executing the three-tier matching hierarchy, the system checks whether the incoming posting has already been collected from the same original source.
 
@@ -238,7 +236,7 @@ CONSTRAINT uq_job_listings_source_post_id UNIQUE (source, source_post_id);
 ```
 This tier prevents repeated scraping of the same Telegram message or web portal listing during hourly cron jobs.
 
-## 5.2 Candidate Retrieval & Matching Scope
+### 5.2 Candidate Retrieval & Matching Scope
 
 The system does not compare every incoming job against every record in the database, which would result in an unacceptable $O(N)$ fuzzy matching bottleneck.
 
@@ -257,7 +255,7 @@ PostgreSQL indexes implemented and recommended:
 
 This reduces unnecessary comparisons and maintains sub-100ms response times as the database scales.
 
-## 5.3 Duplicate Confidence & Decision Classification
+### 5.3 Duplicate Confidence & Decision Classification
 
 A matching score alone does not guarantee that two job postings represent the same vacancy. The system classifies incoming records into three distinct decision states:
 
@@ -277,7 +275,7 @@ A matching score alone does not guarantee that two job postings represent the sa
 
 The 80% and 90% RapidFuzz thresholds are initial configurable parameters evaluated against labeled Cambodian job-posting samples.
 
-## 5.4 Canonical Job Selection & Relationship Integrity (Star Topology)
+### 5.4 Canonical Job Selection & Relationship Integrity (Star Topology)
 
 Canonical selection is deterministic and independent of scraping ingestion order:
 1. **Timestamp Precedence:** Prefer trustworthy original publication timestamp (`posted_at`).
@@ -298,11 +296,11 @@ Job 102 -> duplicate_of = 101  <-- Disallowed by dedup query constraints
 
 All candidate queries explicitly filter by `duplicate_of.is_(None)`, mathematically eliminating multi-hop chains or circular references.
 
-## 5.5 Source Data Preservation & Provenance
+### 5.5 Source Data Preservation & Provenance
 
 The system preserves original information collected from each platform rather than overwriting it destructively.
 
-### Extended Schema: `job_sources`
+#### Extended Schema: `job_sources`
 To track platform provenance at high scale, the architectural model specifies:
 - `id`: Unique source identity key
 - `job_id`: Foreign key referencing canonical `job_listings.id`
@@ -320,7 +318,7 @@ To track platform provenance at high scale, the architectural model specifies:
 
 This allows JobMatch Cambodia to present one clean canonical card while preserving the immutable source record from every platform.
 
-## 5.6 Field-Level Conflict Resolution
+### 5.6 Field-Level Conflict Resolution
 
 The system never assumes incoming information is superior to existing canonical data. Field resolution follows a strict safety matrix:
 
@@ -336,21 +334,21 @@ The system never assumes incoming information is superior to existing canonical 
 | **Company Logo** | Enrich only when missing and source is verified |
 | **Source URL** | Preserve distinct source URLs across all duplicate records |
 
-## 5.7 Contact Verification & Anti-Phishing Protection
+### 5.7 Contact Verification & Anti-Phishing Protection
 
 The system distinguishes between an existing contact and a verified contact:
 - **Verification Statuses:** `unverified`, `source_verified`, `manually_verified`, `flagged`.
 - **Anti-Phishing Rule:** An incoming duplicate must **never** overwrite an established verified contact with an unverified contact.
 - When an incoming scrape presents conflicting contact information for the same company, the conflict is flagged for administrative review rather than silently accepted.
 
-## 5.8 Transaction & Concurrent Scraping Protection
+### 5.8 Transaction & Concurrent Scraping Protection
 
 When multiple background workers scrape vacancies concurrently:
 - Idempotency is enforced at the database level via unique constraints (`source + source_post_id` and `source_url`).
 - Duplicate detection, canonical election, and field enrichment execute within an atomic SQLAlchemy database transaction (`db.commit() / db.rollback()`).
 - Re-checks canonical record status before committing merges, preventing split-brain canonical states.
 
-## 5.9 Job Expiration & Reposting Management
+### 5.9 Job Expiration & Reposting Management
 
 Deduplication and vacancy expiration are decoupled processes:
 - `posted_at`: Original publication timestamp.
@@ -361,11 +359,11 @@ Deduplication and vacancy expiration are decoupled processes:
 
 A 30-day window evaluates whether a post belongs to the *same* recruitment cycle. If a company posts the same title after 6 months, it is treated as a genuinely new vacancy cycle rather than an old duplicate.
 
-## 5.10 Deduplication Audit Logging
+### 5.10 Deduplication Audit Logging
 
 Every automatic matching and merging decision is traceable for transparency:
 
-### Table: `deduplication_logs`
+#### Table: `deduplication_logs`
 - `id`: Auto-incrementing log ID
 - `incoming_job_id`: New job being evaluated
 - `matched_job_id`: Candidate job matched against
@@ -378,15 +376,15 @@ Every automatic matching and merging decision is traceable for transparency:
 
 ---
 
-# 6. Database Integrity & Mobile Query Rules
+## 6. Database Integrity & Mobile Query Rules
 
-## 6.1 Canonical Job Integrity
+### 6.1 Canonical Job Integrity
 1. Canonical jobs must have `duplicate_of = NULL`.
 2. Duplicate records must reference an existing canonical job ID (`duplicate_of = main.id`).
 3. A job cannot reference itself (`CHECK (duplicate_of != id)`).
 4. No duplicate chains: duplicates cannot reference other duplicates.
 
-## 6.2 Flutter Mobile Search Query
+### 6.2 Flutter Mobile Search Query
 
 The mobile search API endpoint serves clean, canonical, and currently active listings:
 
@@ -404,9 +402,9 @@ ORDER BY posted_at DESC;
 
 ---
 
-# 7. Testing & Evaluation Strategy
+## 7. Testing & Evaluation Strategy
 
-## 7.1 Functional Test Cases
+### 7.1 Functional Test Cases
 
 | Test Case | Scenario | Expected Outcome | Code Verification |
 |---|---|---|---|
@@ -419,7 +417,7 @@ ORDER BY posted_at DESC;
 | **TC-07** | Duplicate has salary, canonical has `NULL` | Canonical enriched with duplicate's salary | PASS (`test_dedup.py`) |
 | **TC-08** | Duplicate has longer description | Canonical preserves the longer description text | PASS (`test_dedup.py`) |
 
-## 7.2 Evaluation Metrics
+### 7.2 Evaluation Metrics
 
 The deduplication engine is evaluated on precision, recall, and reliability:
 - **Precision:** $\frac{TP}{TP + FP}$ — Ensures distinct jobs are never mistakenly merged (protecting job diversity).
@@ -427,12 +425,12 @@ The deduplication engine is evaluated on precision, recall, and reliability:
 - **F1-Score:** Harmonic mean of precision and recall.
 - **False Positive Rate:** Target $< 1\%$ to guarantee legitimate vacancies are not hidden from students.
 
-## 7.3 Manual Verification Dataset
+### 7.3 Manual Verification Dataset
 Curated benchmark set of 100 labeled Cambodian recruitment posts across Telegram, CamHR, and JobNet to validate threshold robustness before production deployment.
 
 ---
 
-# 8. Final Architecture Conclusion
+## 8. Final Architecture Conclusion
 
 The JobMatch Cambodia Deduplication & Smart Merging Engine solves the fragmented multi-platform recruitment challenge in Cambodia.
 
@@ -493,27 +491,7 @@ Apply CV to: @aba_recruitment or hr@ababank.com
 
 ---
 
-## 10. Oral Defense Q&A Preparation (Advisor Questions)
-
-### Q1: Why didn't you just delete duplicate job listings with `DELETE FROM job_listings`?
-> **Answer:**  
-> *"Deleting duplicate rows causes permanent data loss. Different platforms publish complementary information: Telegram posts contain fast recruiter handles (@handles) but lack structured salary ranges, whereas web portals contain structured salary ranges and deadlines. By maintaining a soft link (`duplicate_of = main.id`) and merging missing fields, we enrich the primary listing while preserving an immutable audit trail of all scraped sources."*
-
-### Q2: Why use SHA-256 for Tier 1 instead of MD5 or simple string equality?
-> **Answer:**  
-> *"SHA-256 provides a deterministic 256-bit fingerprint of normalized matching attributes (title, company, and location) with exceptionally high collision resistance compared to MD5. It provides $O(1)$ index lookup speed. We do not rely on SHA-256 to understand semantic or phrasing variation; semantic and typographical variations are handled downstream by our RapidFuzz fuzzy matching tiers."*
-
-### Q3: How does `token_sort_ratio` work, and why is it better than standard Levenshtein distance?
-> **Answer:**  
-> *"Standard Levenshtein distance is order-sensitive. For example, comparing 'Mobile Developer Junior' with 'Junior Mobile Developer' yields a poor Levenshtein score despite meaning the exact same thing. RapidFuzz's `token_sort_ratio` tokenizes the strings, converts them to lowercase, sorts the tokens alphabetically, and then compares them. This makes our matching robust against variations in word order commonly found across Cambodian job portals."*
-
-### Q4: How do you prevent malicious recruiters from replacing contact information (anti-phishing)?
-> **Answer:**  
-> *"We maintain strict field immutability for established contact channels. In `dedup_manager.py`, duplicate merges can enrich empty informational fields like salary or deadlines, but the primary record's contact channels (`apply_email`, `apply_phone`, `apply_telegram`) are never overwritten by an incoming duplicate scrape. Conflicting contacts are flagged for review rather than blindly adopted."*
-
----
-
-## 11. Component & Codebase Traceability
+## 10. Component & Codebase Traceability
 
 | Pipeline Stage | Function / Responsibility | Key Code Files |
 |---|---|---|
