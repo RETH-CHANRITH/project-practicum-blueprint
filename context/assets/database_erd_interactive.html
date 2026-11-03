@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobMatch Cambodia — Database ERD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #0A0F1D;
+    --bg-canvas: #0F172A;
+    --border-canvas: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    
+    --card-bg: #111827;
+    --card-border: #1F2937;
+    --card-hover-border: #38BDF8;
+    --row-alt: #0D1322;
+    --row-border: #1F2937;
+    --row-fk-tint: rgba(244, 63, 94, 0.08);
+    
+    --hdr-accounts: #1E40AF;
+    --hdr-accounts-text: #DBEAFE;
+    --hdr-skills: #0F766E;
+    --hdr-skills-text: #CCFBF1;
+    --hdr-jobs: #B45309;
+    --hdr-jobs-text: #FEF3C7;
+    
+    --badge-pk: #38BDF8;
+    --badge-fk: #F43F5E;
+    --badge-uk: #2DD4BF;
+    
+    --line-stroke: #475569;
+    --line-active: #38BDF8;
+    --line-soft: #94A3B8;
+    
+    --card-dim: 0.18;
+    --focus-ring: #38BDF8;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-page: #F1F5F9;
+      --bg-canvas: #FFFFFF;
+      --border-canvas: #CBD5E1;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+      
+      --card-bg: #FFFFFF;
+      --card-border: #CBD5E1;
+      --card-hover-border: #0284C7;
+      --row-alt: #F8FAFC;
+      --row-border: #E2E8F0;
+      --row-fk-tint: rgba(244, 63, 94, 0.06);
+      
+      --hdr-accounts: #2563EB;
+      --hdr-accounts-text: #FFFFFF;
+      --hdr-skills: #0D9488;
+      --hdr-skills-text: #FFFFFF;
+      --hdr-jobs: #D97706;
+      --hdr-jobs-text: #FFFFFF;
+      
+      --badge-pk: #0284C7;
+      --badge-fk: #E11D48;
+      --badge-uk: #0D9488;
+      
+      --line-stroke: #94A3B8;
+      --line-active: #0284C7;
+      --line-soft: #64748B;
+      
+      --card-dim: 0.2;
+      --focus-ring: #0284C7;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 30px 20px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-container {
+    max-width: 2200px;
+    margin: 0 auto;
+  }
+
+  /* Header Section */
+  header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .title-group h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+
+  .stats-summary {
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .stats-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-canvas);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover {
+    border-color: var(--card-hover-border);
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Legend */
+  .legend-bar {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-canvas);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .legend-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  .legend-tag.pk { color: var(--badge-pk); border: 1px solid var(--badge-pk); }
+  .legend-tag.fk { color: var(--badge-fk); border: 1px solid var(--badge-fk); }
+  .legend-tag.uk { color: var(--badge-uk); border: 1px solid var(--badge-uk); }
+
+  .legend-pill {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .legend-pill.accounts { background: var(--hdr-accounts); }
+  .legend-pill.skills { background: var(--hdr-skills); }
+  .legend-pill.jobs { background: var(--hdr-jobs); }
+
+  /* Diagram Viewport & Canvas */
+  .diagram-viewport {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-canvas);
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: relative;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+  }
+
+  .diagram-canvas {
+    position: relative;
+    width: 1960px;
+    min-height: 1140px;
+    padding: 40px 30px;
+    transform-origin: top left;
+    transition: transform 0.2s ease-out;
+  }
+
+  /* SVG Routing Layer */
+  svg.erd-svg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .erd-line {
+    fill: none;
+    stroke: var(--line-stroke);
+    stroke-width: 1.75;
+    transition: stroke 0.2s, opacity 0.2s, stroke-width 0.2s;
+  }
+
+  .erd-line.soft {
+    stroke: var(--line-soft);
+    stroke-dasharray: 4 4;
+  }
+
+  .erd-line.active {
+    stroke: var(--line-active);
+    stroke-width: 2.5;
+    opacity: 1 !important;
+  }
+
+  .erd-line.dimmed {
+    opacity: 0.12;
+  }
+
+  /* Table Cards */
+  .table-card {
+    position: absolute;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    width: 270px;
+    z-index: 10;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .table-card:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  .table-card.active {
+    border-color: var(--card-hover-border);
+    box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.3);
+    opacity: 1 !important;
+  }
+
+  .table-card.dimmed {
+    opacity: var(--card-dim);
+  }
+
+  .table-card.w-wide { width: 330px; }
+  .table-card.w-xwide { width: 360px; }
+  .table-card.w-huge { width: 420px; }
+
+  /* Table Header */
+  .table-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    user-select: none;
+  }
+  .table-hdr.group-accounts { background: var(--hdr-accounts); color: var(--hdr-accounts-text); }
+  .table-hdr.group-skills { background: var(--hdr-skills); color: var(--hdr-skills-text); }
+  .table-hdr.group-jobs { background: var(--hdr-jobs); color: var(--hdr-jobs-text); }
+
+  .col-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    opacity: 0.85;
+    font-weight: 500;
+  }
+
+  /* Table Content */
+  .table-grid {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 85px 1fr 34px;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: 12.5px;
+    border-top: 1px solid var(--row-border);
+    position: relative;
+  }
+
+  .table-row:nth-child(even) {
+    background: var(--row-alt);
+  }
+
+  .table-row.fk-row {
+    background: var(--row-fk-tint);
+  }
+
+  .col-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .col-name {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .col-name.bold {
+    font-weight: 600;
+  }
+
+  .col-badge {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .col-badge.PK { color: var(--badge-pk); }
+  .col-badge.FK { color: var(--badge-fk); }
+  .col-badge.UK { color: var(--badge-uk); }
+
+  /* Tooltip */
+  [data-tooltip] {
+    position: relative;
+  }
+  [data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+
+  /* Suggested Improvements Section */
+  .suggestions-section {
+    margin-top: 40px;
+    border-top: 1px solid var(--border-canvas);
+    padding-top: 28px;
+  }
+
+  .suggestions-hdr {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+  
+  .suggestions-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .suggestion-card {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border-canvas);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .suggestion-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+
+  .suggestion-card p {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-container">
+  <!-- Top Header -->
+  <header>
+    <div class="title-group">
+      <h1>JobMatch Cambodia — Database ERD</h1>
+      <div class="stats-summary" id="statsSummary">
+        <span>Computing schema metrics...</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btnFit">Fit width</button>
+      <button class="btn" id="btnReset">100%</button>
+    </div>
+  </header>
+
+  <!-- Legend -->
+  <div class="legend-bar">
+    <div class="legend-section">
+      <span style="font-weight:600; color:var(--text-primary);">Domains:</span>
+      <div class="legend-item"><span class="legend-pill accounts"></span> Accounts & Activity</div>
+      <div class="legend-item"><span class="legend-pill skills"></span> Skills Taxonomy</div>
+      <div class="legend-item"><span class="legend-pill jobs"></span> Jobs & Sources</div>
+    </div>
+    <div class="legend-section">
+      <span style="font-weight:600; color:var(--text-primary);">Keys:</span>
+      <div class="legend-item"><span class="legend-tag pk">PK</span> Primary Key</div>
+      <div class="legend-item"><span class="legend-tag fk">FK</span> Foreign Key</div>
+      <div class="legend-item"><span class="legend-tag uk">UK</span> Unique Key</div>
+    </div>
+    <div class="legend-section">
+      <span style="font-weight:600; color:var(--text-primary);">Relationships:</span>
+      <div class="legend-item">
+        <svg width="28" height="12"><path d="M0 6 L22 6 M14 2 L22 6 L14 10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        One to Many
+      </div>
+      <div class="legend-item">
+        <svg width="24" height="12"><path d="M0 6 L20 6 M14 2 L14 10 M18 2 L18 10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        Exactly One
+      </div>
+      <div class="legend-item">
+        <svg width="28" height="12"><path d="M0 6 L24 6" stroke-dasharray="3 3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        Soft Link (No FK)
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagram Canvas -->
+  <div class="diagram-viewport" id="viewport">
+    <div class="diagram-canvas" id="canvas">
+      <svg class="erd-svg-layer" id="svgLayer">
+        <defs>
+          <!-- Crow Foot (Many) -->
+          <marker id="marker-crow" viewBox="0 0 16 16" refX="16" refY="8" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+            <path d="M 0 1 L 16 8 L 0 15 M 10 1 L 10 15" fill="none" stroke="var(--line-stroke)" stroke-width="1.75" />
+          </marker>
+          <!-- Exactly One (Double Bar) -->
+          <marker id="marker-one" viewBox="0 0 16 16" refX="0" refY="8" markerWidth="13" markerHeight="13" orient="auto">
+            <line x1="5" y1="2" x2="5" y2="14" stroke="var(--line-stroke)" stroke-width="1.75" />
+            <line x1="11" y1="2" x2="11" y2="14" stroke="var(--line-stroke)" stroke-width="1.75" />
+          </marker>
+        </defs>
+        <g id="svgGroupLines"></g>
+      </svg>
+      <div id="tableContainer"></div>
+    </div>
+  </div>
+
+  <!-- Suggested Improvements Section -->
+  <section class="suggestions-section">
+    <h2 class="suggestions-hdr">Suggested Architecture Improvements</h2>
+    <p class="suggestions-sub">The following design notes represent architectural recommendations for thesis defense discussion. They are intentional observations and not applied to the current production diagram.</p>
+    <div class="suggestions-grid" id="suggestionsContainer"></div>
+  </section>
+</div>
+
+<script>
+// ==========================================
+// 1. DATA SCHEMA SPECIFICATION
+// ==========================================
+const SCHEMA = {
+  groups: {
+    accounts: { name: "Accounts and activity", class: "group-accounts" },
+    skills: { name: "Skills", class: "group-skills" },
+    jobs: { name: "Jobs and sources", class: "group-jobs" }
+  },
+  tables: [
+    {
+      id: "users",
+      name: "USERS",
+      group: "accounts",
+      column: 1,
+      order: 1,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "email", type: "string", key: "UK" },
+        { name: "password_hash", type: "string" },
+        { name: "role", type: "string" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "profiles",
+      name: "PROFILES",
+      group: "accounts",
+      column: 1,
+      order: 2,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "user_id", type: "int", key: "FK", target: "users.id" },
+        { name: "full_name", type: "string" },
+        { name: "education", type: "string" },
+        { name: "experience_level", type: "string" },
+        { name: "preferred_role", type: "string" },
+        { name: "preferred_location", type: "string" },
+        { name: "expected_salary", type: "numeric" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "email_otps",
+      name: "EMAIL_OTPS",
+      group: "accounts",
+      column: 1,
+      order: 3,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "email", type: "string", softTarget: "users.email" },
+        { name: "code", type: "string" },
+        { name: "purpose", type: "string" },
+        { name: "expires_at", type: "timestamp" },
+        { name: "is_used", type: "boolean" },
+        { name: "created_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "profile_skills",
+      name: "PROFILE_SKILLS",
+      group: "accounts",
+      column: 2,
+      order: 1,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "profile_id", type: "int", key: "FK", target: "profiles.id" },
+        { name: "skill_id", type: "int", key: "FK", target: "skills.id" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "skill_categories",
+      name: "SKILL_CATEGORIES",
+      group: "skills",
+      column: 3,
+      order: 1,
+      widthClass: "w-wide",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "name", type: "string", key: "UK" },
+        { name: "code", type: "string", key: "UK" },
+        { name: "icon", type: "string" },
+        { name: "description", type: "string" },
+        { name: "display_order", type: "int" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "skills",
+      name: "SKILLS",
+      group: "skills",
+      column: 3,
+      order: 2,
+      widthClass: "w-wide",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "category_id", type: "int", key: "FK", target: "skill_categories.id" },
+        { name: "name", type: "string", key: "UK" },
+        { name: "category", type: "string" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "job_skills",
+      name: "JOB_SKILLS",
+      group: "skills",
+      column: 4,
+      order: 1,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "job_id", type: "int", key: "FK", target: "job_listings.id" },
+        { name: "skill_id", type: "int", key: "FK", target: "skills.id" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "saved_jobs",
+      name: "SAVED_JOBS",
+      group: "accounts",
+      column: 4,
+      order: 2,
+      widthClass: "",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "user_id", type: "int", key: "FK", target: "users.id" },
+        { name: "job_id", type: "int", key: "FK", target: "job_listings.id" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "sources",
+      name: "SOURCES (PLATFORMS)",
+      group: "jobs",
+      column: 4,
+      order: 3,
+      widthClass: "w-wide",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "name", type: "string", key: "UK" },
+        { name: "code", type: "string", key: "UK" },
+        { name: "platform_type", type: "string" },
+        { name: "url", type: "text" },
+        { name: "logo_url", type: "text" },
+        { name: "is_active", type: "boolean" },
+        { name: "scrape_interval_minutes", type: "int" },
+        { name: "last_scraped_at", type: "timestamp" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    },
+    {
+      id: "job_listings",
+      name: "JOB_LISTINGS",
+      group: "jobs",
+      column: 5,
+      order: 1,
+      widthClass: "w-huge",
+      columns: [
+        { name: "id", type: "int", key: "PK" },
+        { name: "source_id", type: "int", key: "FK", target: "sources.id" },
+        { name: "title", type: "string" },
+        { name: "company", type: "string" },
+        { name: "location", type: "string" },
+        { name: "experience_level", type: "string" },
+        { name: "job_type", type: "string" },
+        { name: "salary_min", type: "numeric" },
+        { name: "salary_max", type: "numeric" },
+        { name: "salary_currency", type: "string" },
+        { name: "salary_period", type: "string" },
+        { name: "is_negotiable", type: "boolean" },
+        { name: "description", type: "text" },
+        { name: "source", type: "string" },
+        { name: "source_url", type: "text", key: "UK" },
+        { name: "company_url", type: "string" },
+        { name: "application_url", type: "string" },
+        { name: "work_arrangement", type: "string" },
+        { name: "job_category", type: "string" },
+        { name: "job_level", type: "string" },
+        { name: "classification_source", type: "string" },
+        { name: "posted_at", type: "date" },
+        { name: "deadline", type: "date" },
+        { name: "scraped_at", type: "timestamp" },
+        { name: "timestamptz", type: "last_seen_at" },
+        { name: "duplicate_of", type: "int", key: "FK", target: "job_listings.id" },
+        { name: "dedup_hash", type: "string" },
+        { name: "is_active", type: "boolean" },
+        { name: "created_at", type: "timestamp" },
+        { name: "updated_at", type: "timestamp" }
+      ]
+    }
+  ],
+  relationships: [
+    { from: "users.id", to: "profiles.user_id", type: "1:1", label: "users.id → profiles.user_id" },
+    { from: "users.id", to: "saved_jobs.user_id", type: "1:N", label: "users.id → saved_jobs.user_id" },
+    { from: "profiles.id", to: "profile_skills.profile_id", type: "1:N", label: "profiles.id → profile_skills.profile_id" },
+    { from: "skill_categories.id", to: "skills.category_id", type: "1:N", label: "skill_categories.id → skills.category_id" },
+    { from: "skills.id", to: "profile_skills.skill_id", type: "1:N", label: "skills.id → profile_skills.skill_id" },
+    { from: "skills.id", to: "job_skills.skill_id", type: "1:N", label: "skills.id → job_skills.skill_id" },
+    { from: "job_listings.id", to: "job_skills.job_id", type: "1:N", label: "job_listings.id → job_skills.job_id" },
+    { from: "job_listings.id", to: "saved_jobs.job_id", type: "1:N", label: "job_listings.id → saved_jobs.job_id" },
+    { from: "sources.id", to: "job_listings.source_id", type: "1:N", label: "sources.id → job_listings.source_id" },
+    { from: "job_listings.id", to: "job_listings.duplicate_of", type: "1:N", isSelf: true, label: "job_listings.id → job_listings.duplicate_of (self-reference)" },
+    { from: "users.email", to: "email_otps.email", type: "soft", isSoft: true, label: "users.email ⤏ email_otps.email (soft link, no FK)" }
+  ],
+  suggestions: [
+    {
+      title: "Self Reference Loop (duplicate_of)",
+      desc: "job_listings.duplicate_of creates a self-referencing hierarchy where scraped duplicates link directly to the canonical parent job row."
+    },
+    {
+      title: "Soft Link for OTP Codes",
+      desc: "email_otps.email logically correlates with users.email without an enforced Foreign Key, enabling passwordless verification before a user row is created."
+    },
+    {
+      title: "Composite Unique Keys & 1:1 Constraints",
+      desc: "Enforce UNIQUE(profile_id, skill_id) and UNIQUE(job_id, skill_id) on junction tables to eliminate duplicate pairings, plus UNIQUE(user_id) on profiles."
+    },
+    {
+      title: "Normalized Taxonomy Columns",
+      desc: "skills.category and job_listings.source are kept for fast denormalized reads alongside strict relational foreign keys (category_id, source_id)."
+    },
+    {
+      title: "Referential Action Rules (ON DELETE)",
+      desc: "users → profiles: CASCADE; skill_categories → skills: SET NULL; sources → job_listings: SET NULL; junction associations: CASCADE."
+    },
+    {
+      title: "Timestamptz Consistency & Enums",
+      desc: "Standardize all temporal tracking on timestamptz (UTC). Constrain experience_level, work_arrangement, and platform_type using CHECK enums."
+    },
+    {
+      title: "Feed Query Indexes",
+      desc: "Composite index on job_listings(is_active, posted_at DESC) and partial index on job_listings(source_id) WHERE is_active = true for fast indexing."
+    }
+  ]
+};
+
+// ==========================================
+// 2. LAYOUT ENGINE (COLUMNS & ALIGNMENT)
+// ==========================================
+const COLUMN_X = {
+  1: 40,
+  2: 370,
+  3: 710,
+  4: 1110,
+  5: 1530
+};
+
+const TABLE_POSITIONS = {
+  users:            { col: 1, top: 40 },
+  profiles:         { col: 1, top: 320 },
+  email_otps:       { col: 1, top: 780 },
+  
+  profile_skills:   { col: 2, top: 420 },
+  
+  skill_categories: { col: 3, top: 40 },
+  skills:           { col: 3, top: 420 },
+  
+  job_skills:       { col: 4, top: 420 },
+  saved_jobs:       { col: 4, top: 760 },
+  sources:          { col: 4, top: 970 },
+  
+  job_listings:     { col: 5, top: 40 }
+};
+
+// ==========================================
+// 3. RENDER APPLICATION
+// ==========================================
+function init() {
+  renderStats();
+  renderTables();
+  renderSuggestions();
+  
+  // Wait for layout calculation then align and draw SVG lines
+  setTimeout(() => {
+    alignSkillsRow();
+    drawConnections();
+  }, 100);
+
+  window.addEventListener('resize', () => {
+    alignSkillsRow();
+    drawConnections();
+  });
+
+  setupInteractions();
+}
+
+// Stats summary computation
+function renderStats() {
+  const totalTables = SCHEMA.tables.length;
+  let totalCols = 0;
+  SCHEMA.tables.forEach(t => totalCols += t.columns.length);
+  const totalFKs = SCHEMA.relationships.filter(r => !r.isSoft).length;
+  
+  const el = document.getElementById('statsSummary');
+  el.innerHTML = `
+    <span>${totalTables} tables</span>
+    <span class="stats-dot"></span>
+    <span>${totalCols} columns</span>
+    <span class="stats-dot"></span>
+    <span>${totalFKs} foreign key relationships</span>
+    <span class="stats-dot"></span>
+    <span>1 soft link</span>
+  `;
+}
+
+// Render Table Cards
+function renderTables() {
+  const container = document.getElementById('tableContainer');
+  container.innerHTML = '';
+
+  SCHEMA.tables.forEach(table => {
+    const pos = TABLE_POSITIONS[table.id] || { col: 1, top: 40 };
+    const left = COLUMN_X[pos.col];
+    
+    const card = document.createElement('div');
+    card.className = `table-card ${table.widthClass}`;
+    card.id = `card-${table.id}`;
+    card.tabIndex = 0;
+    card.style.left = `${left}px`;
+    card.style.top = `${pos.top}px`;
+    card.dataset.tableId = table.id;
+
+    const groupDef = SCHEMA.groups[table.group] || { class: "group-accounts" };
+
+    let rowsHtml = '';
+    table.columns.forEach((col, idx) => {
+      const isKey = !!col.key;
+      const isFk = col.key === 'FK';
+      const tooltip = col.target ? `data-tooltip="${col.name} → ${col.target}"` : (col.softTarget ? `data-tooltip="${col.name} ⤏ ${col.softTarget}"` : '');
+      
+      rowsHtml += `
+        <div class="table-row ${isFk ? 'fk-row' : ''}" data-row="${table.id}.${col.name}" ${tooltip}>
+          <div class="col-type">${col.type}</div>
+          <div class="col-name ${isKey ? 'bold' : ''}">${col.name}</div>
+          <div class="col-badge ${col.key || ''}">${col.key || ''}</div>
+        </div>
+      `;
+    });
+
+    card.innerHTML = `
+      <div class="table-hdr ${groupDef.class}">
+        <span>${table.name}</span>
+        <span class="col-count">${table.columns.length} cols</span>
+      </div>
+      <div class="table-grid">
+        ${rowsHtml}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// Align skills.id row with profile_skills.skill_id and job_skills.skill_id
+function alignSkillsRow() {
+  const psRow = document.querySelector('[data-row="profile_skills.skill_id"]');
+  const sRow = document.querySelector('[data-row="skills.id"]');
+  const jsRow = document.querySelector('[data-row="job_skills.skill_id"]');
+  
+  if (psRow && sRow) {
+    const psY = psRow.getBoundingClientRect().top;
+    const sY = sRow.getBoundingClientRect().top;
+    const diff = psY - sY;
+    
+    if (Math.abs(diff) > 1) {
+      const cardSkills = document.getElementById('card-skills');
+      const curTop = parseFloat(cardSkills.style.top) || 420;
+      cardSkills.style.top = `${curTop + diff}px`;
+    }
+  }
+
+  if (psRow && jsRow) {
+    const psY = psRow.getBoundingClientRect().top;
+    const jsY = jsRow.getBoundingClientRect().top;
+    const diff = psY - jsY;
+    if (Math.abs(diff) > 1) {
+      const cardJobSkills = document.getElementById('card-job_skills');
+      const curTop = parseFloat(cardJobSkills.style.top) || 420;
+      cardJobSkills.style.top = `${curTop + diff}px`;
+    }
+  }
+}
+
+// ==========================================
+// 4. DRAW ORTHOGONAL SVG LINES & ROUTING
+// ==========================================
+function drawConnections() {
+  const svgGroup = document.getElementById('svgGroupLines');
+  svgGroup.innerHTML = '';
+  const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+
+  SCHEMA.relationships.forEach((rel, relIdx) => {
+    const fromEl = document.querySelector(`[data-row="${rel.from}"]`);
+    const toEl = document.querySelector(`[data-row="${rel.to}"]`);
+
+    if (!fromEl || !toEl) return;
+
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+
+    let pathD = '';
+
+    // Handle self-referencing loop on job_listings.id -> job_listings.duplicate_of
+    if (rel.isSelf) {
+      const startX = fromRect.right - canvasRect.left;
+      const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+      const endX = toRect.right - canvasRect.left;
+      const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+      const loopX = startX + 40;
+
+      pathD = `M ${startX} ${startY} L ${loopX} ${startY} L ${loopX} ${endY} L ${endX} ${endY}`;
+    } 
+    // Handle soft link: users.email -> email_otps.email
+    else if (rel.isSoft) {
+      const startX = fromRect.left - canvasRect.left;
+      const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+      const endX = toRect.left - canvasRect.left;
+      const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+      const elbowX = startX - 20;
+
+      pathD = `M ${startX} ${startY} L ${elbowX} ${startY} L ${elbowX} ${endY} L ${endX} ${endY}`;
+    }
+    // Handle standard relationships
+    else {
+      // Determine exit side based on relative position
+      if (fromRect.right < toRect.left) {
+        // Source is left of Target
+        const startX = fromRect.right - canvasRect.left;
+        const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+        const endX = toRect.left - canvasRect.left;
+        const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+
+        // If directly horizontal (like skills -> job_skills)
+        if (Math.abs(startY - endY) < 3) {
+          pathD = `M ${startX} ${startY} L ${endX} ${endY}`;
+        } else {
+          // Orthogonal bend in the gap
+          const midX = startX + (endX - startX) * 0.5 + (relIdx % 3) * 6;
+          pathD = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
+        }
+      } else if (fromRect.left > toRect.right) {
+        // Source is right of Target
+        const startX = fromRect.left - canvasRect.left;
+        const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+        const endX = toRect.right - canvasRect.left;
+        const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+
+        if (Math.abs(startY - endY) < 3) {
+          pathD = `M ${startX} ${startY} L ${endX} ${endY}`;
+        } else {
+          const midX = startX - (startX - endX) * 0.5 + (relIdx % 3) * 6;
+          pathD = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
+        }
+      } else {
+        // Vertical relationship (e.g. users -> profiles or skill_categories -> skills)
+        const fromCard = fromEl.closest('.table-card').getBoundingClientRect();
+        const toCard = toEl.closest('.table-card').getBoundingClientRect();
+        
+        if (fromCard.bottom <= toCard.top) {
+          const startX = fromCard.left + fromCard.width * 0.5 - canvasRect.left;
+          const startY = fromCard.bottom - canvasRect.top;
+          const endX = toCard.left + toCard.width * 0.5 - canvasRect.left;
+          const endY = toCard.top - canvasRect.top;
+
+          pathD = `M ${startX} ${startY} L ${endX} ${endY}`;
+        } else {
+          // Fallback orthogonal route
+          const startX = fromRect.right - canvasRect.left;
+          const startY = fromRect.top + fromRect.height / 2 - canvasRect.top;
+          const endX = toRect.right - canvasRect.left;
+          const endY = toRect.top + toRect.height / 2 - canvasRect.top;
+          const outX = Math.max(startX, endX) + 30;
+          pathD = `M ${startX} ${startY} L ${outX} ${startY} L ${outX} ${endY} L ${endX} ${endY}`;
+        }
+      }
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathD);
+    path.setAttribute('class', `erd-line ${rel.isSoft ? 'soft' : ''}`);
+    path.dataset.fromTable = rel.from.split('.')[0];
+    path.dataset.toTable = rel.to.split('.')[0];
+    path.dataset.label = rel.label;
+
+    if (!rel.isSoft) {
+      path.setAttribute('marker-start', 'url(#marker-one)');
+      if (rel.type === '1:N') {
+        path.setAttribute('marker-end', 'url(#marker-crow)');
+      } else {
+        path.setAttribute('marker-end', 'url(#marker-one)');
+      }
+    }
+
+    // Line tooltip
+    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = rel.label;
+    path.appendChild(title);
+
+    svgGroup.appendChild(path);
+  });
+}
+
+// ==========================================
+// 5. INTERACTIVITY & HIGHLIGHTING
+// ==========================================
+function setupInteractions() {
+  const cards = document.querySelectorAll('.table-card');
+  const lines = () => document.querySelectorAll('.erd-line');
+
+  cards.forEach(card => {
+    const tableId = card.dataset.tableId;
+
+    const activate = () => {
+      // Find connected table IDs
+      const connectedTables = new Set([tableId]);
+      SCHEMA.relationships.forEach(rel => {
+        const fromT = rel.from.split('.')[0];
+        const toT = rel.to.split('.')[0];
+        if (fromT === tableId) connectedTables.add(toT);
+        if (toT === tableId) connectedTables.add(fromT);
+      });
+
+      // Highlight/Dim tables
+      cards.forEach(c => {
+        if (connectedTables.has(c.dataset.tableId)) {
+          c.classList.add('active');
+          c.classList.remove('dimmed');
+        } else {
+          c.classList.add('dimmed');
+          c.classList.remove('active');
+        }
+      });
+
+      // Highlight/Dim lines
+      lines().forEach(line => {
+        if (line.dataset.fromTable === tableId || line.dataset.toTable === tableId) {
+          line.classList.add('active');
+          line.classList.remove('dimmed');
+        } else {
+          line.classList.add('dimmed');
+          line.classList.remove('active');
+        }
+      });
+    };
+
+    const deactivate = () => {
+      cards.forEach(c => {
+        c.classList.remove('active', 'dimmed');
+      });
+      lines().forEach(line => {
+        line.classList.remove('active', 'dimmed');
+      });
+    };
+
+    card.addEventListener('mouseenter', activate);
+    card.addEventListener('mouseleave', deactivate);
+    card.addEventListener('focus', activate);
+    card.addEventListener('blur', deactivate);
+  });
+
+  // Fit width and 100% controls
+  const canvas = document.getElementById('canvas');
+  const viewport = document.getElementById('viewport');
+
+  document.getElementById('btnFit').addEventListener('click', () => {
+    const vpWidth = viewport.clientWidth - 40;
+    const canvasWidth = 1960;
+    const scale = Math.min(1, vpWidth / canvasWidth);
+    canvas.style.transform = `scale(${scale})`;
+    viewport.style.height = `${1140 * scale + 40}px`;
+  });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    canvas.style.transform = 'scale(1)';
+    viewport.style.height = 'auto';
+  });
+}
+
+// Render Suggestions Cards
+function renderSuggestions() {
+  const container = document.getElementById('suggestionsContainer');
+  container.innerHTML = '';
+
+  SCHEMA.suggestions.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'suggestion-card';
+    card.innerHTML = `
+      <h3>${item.title}</h3>
+      <p>${item.desc}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Run on page ready
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
