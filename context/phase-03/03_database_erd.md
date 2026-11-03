@@ -168,6 +168,9 @@ erDiagram
     }
 ```
 
+> [!TIP]
+> 🔗 **[Open Live Interactive ERD (Full Screen Canvas)](https://claude.ai/artifact/L3Acd5cYvVLHfjumXQkZ3P)**  
+> *(Click or hover any table to highlight its connections and inspect schema details)*
 
 ![Database ERD](../assets/database_erd.jpg)
 
