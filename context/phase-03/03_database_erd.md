@@ -211,20 +211,6 @@ Stores personal and professional information for candidate matching. Connected 1
 ### Table: `skill_categories`
 Master taxonomy table grouping technical and professional competencies into structured domain clusters (3NF Database Normalization).
 
-```mermaid
-erDiagram
-    skill_categories {
-        int id PK
-        string name UK
-        string code UK
-        string icon
-        string description
-        int display_order
-        timestamp created_at
-        timestamp updated_at
-    }
-```
-
 **Purpose & Function:**
 1. **Mobile UI Categorization (SCR-07 Profile Skill Chips):** Prevents showing candidates a flat, unorganized list of 50+ skills. In Flutter, skills are rendered grouped under visual category headers/chips (e.g. Mobile, Backend, Database).
 2. **Standardized Domain Taxonomy:** Normalizes skill domain classifications across mobile client and matching engine.
@@ -401,39 +387,12 @@ Stores user bookmarks for listings saved to be reviewed or applied to later.
 ### Table: `email_otps`
 Stores temporary 6-digit OTP verification codes for email verification and passwordless authentication.
 
-```mermaid
-erDiagram
-    email_otps {
-        int id PK
-        string email
-        string code
-        string purpose
-        timestamp expires_at
-        boolean is_used
-        timestamp created_at
-    }
-```
-
-**Purpose & Function:**
-1. **Passwordless Authentication & Verification (EP-02, EP-03):** Delivers temporary 6-digit security codes via email without requiring users to remember static passwords.
-2. **Soft Link to `users.email` (No DB Foreign Key):** Enables verification for newly registering candidates *before* their user record is created in the `users` table.
-3. **10-Minute Expiration Window:** Automatically invalidates codes after 10 minutes to protect against brute-force replay attacks.
-
 | Column | Data type | Constraints | Nullable | Description |
 |---|---|---|---|---|
 | id | integer | PRIMARY KEY, SERIAL | No | Unique OTP identifier |
 | email | varchar(255) | INDEX | No | Target recipient email address |
 | code | varchar(6) | | No | 6-digit cryptographic verification code |
-| purpose | varchar(50) | DEFAULT 'login_or_verify' | No | Purpose of OTP ('register', 'login', 'password_reset') |
+| purpose | varchar(50) | DEFAULT 'login_or_verify' | No | Purpose of OTP ('register', 'login', 'reset') |
 | expires_at | timestamptz | | No | Expiration timestamp (default 10 minutes) |
 | is_used | boolean | DEFAULT false | No | Whether this code was already consumed |
 | created_at | timestamptz | DEFAULT now() | No | When the code was generated |
-
-#### Concrete Seed Data Example (`email_otps` Table):
-Demonstrates realistic records stored during registration, passwordless login, and password reset flows:
-
-| `id` (PK) | `email` | `code` | `purpose` | `expires_at` | `is_used` | `created_at` | Lifecycle Status & Explanation |
-|:---:|---|:---:|:---:|---|:---:|---|---|
-| **1** | `dara.candidate@gmail.com` | `482915` | `register` | `2026-10-24 10:15:00+07` | `true` | `2026-10-24 10:05:00+07` | ✅ **Consumed**: Successfully verified new candidate registration |
-| **2** | `sokha.dev@yahoo.com` | `719304` | `login` | `2026-10-24 11:30:00+07` | `false` | `2026-10-24 11:20:00+07` | ⏳ **Pending**: Active code within 10-min window, waiting for user entry |
-| **3** | `chenda.it@outlook.com` | `105822` | `password_reset` | `2026-10-24 08:45:00+07` | `false` | `2026-10-24 08:35:00+07` | ❌ **Expired**: Code exceeded 10-minute validity; user must request new OTP |
