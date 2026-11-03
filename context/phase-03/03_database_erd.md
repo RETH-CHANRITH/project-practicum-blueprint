@@ -211,6 +211,20 @@ Stores personal and professional information for candidate matching. Connected 1
 ### Table: `skill_categories`
 Master taxonomy table grouping technical and professional competencies into structured domain clusters (3NF Database Normalization).
 
+```mermaid
+erDiagram
+    skill_categories {
+        int id PK
+        string name UK
+        string code UK
+        string icon
+        string description
+        int display_order
+        timestamp created_at
+        timestamp updated_at
+    }
+```
+
 **Purpose & Function:**
 1. **Mobile UI Categorization (SCR-07 Profile Skill Chips):** Prevents showing candidates a flat, unorganized list of 50+ skills. In Flutter, skills are rendered grouped under visual category headers/chips (e.g. Mobile, Backend, Database).
 2. **Standardized Domain Taxonomy:** Normalizes skill domain classifications across mobile client and matching engine.
