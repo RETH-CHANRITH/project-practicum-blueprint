@@ -16,7 +16,7 @@
 |---|---|---|---|
 | Backend language & framework | Python 3.11 + FastAPI (0.110+) | Node.js (Express) / Django | Fast asynchronous performance, native integration with Python data scraping (`bs4`) and AI matching (`scikit-learn`), automatic interactive Swagger API documentation. |
 | Database | PostgreSQL 16 | MySQL / MongoDB | Excellent relational integrity, powerful full-text search indexing for job descriptions, JSONB support for flexible metadata, and native Docker support. |
-| Client (mobile or web) | Flutter 3.44 (Dart 3.12) | Kotlin (Android) / React Native | Compiles natively to Android APK, single codebase, fast hot reload, rich component library matching the Jobko UI design kit. |
+| Client (mobile or web) | Flutter 3.47 (Dart 3.13) | Kotlin (Android) / React Native | Compiles natively to Android APK, single codebase, fast hot reload, rich component library matching the Jobko UI design kit. |
 | Authentication | JWT (JSON Web Tokens) with passlib (bcrypt) | Firebase Auth / Supabase | Completely self-hosted without external third-party vendor lock-in or cost; client sends token as `Authorization: Bearer <token>`. |
 | API testing tool | Postman / pytest with HTTPX | Bruno / Insomnia | Standard industry tool for team and defense demos, automated status code assertions, exports clean JSON collections into `api-specs/`. |
 | Hosting / running locally | Docker Compose (for PostgreSQL) + Uvicorn locally | Manual PostgreSQL install | Reproducible database environment with `docker compose up -d db`, runs on any OS without configuration mismatches. |

@@ -56,7 +56,7 @@ flowchart LR
 
 | Component | Responsibility | Technology | Runs when | Talks to |
 |---|---|---|---|---|
-| Flutter Mobile App | Provides mobile UI for authentication, skill setup, job discovery, filtering, and external application links | Flutter 3.44 (Dart 3.12) | On user interaction (Android device) | Backend API |
+| Flutter Mobile App | Provides mobile UI for authentication, skill setup, job discovery, filtering, and external application links | Flutter 3.47 (Dart 3.13) | On user interaction (Android device) | Backend API |
 | Backend API | Handles authentication (JWT), routes requests, enforces validation rules, and queries database | Python 3.11, FastAPI | Continuously listening on port 8000 | PostgreSQL Database, AI Matching Engine |
 | PostgreSQL Database | Persists users, profiles, normalized job listings, skill taxonomies, and saved bookmarks | PostgreSQL 16 | Continuously (Docker container) | Backend API, Scraper Pipeline |
 | Scraper & Data Pipeline | Periodically extracts raw jobs from external websites and Telegram, cleans text, and deduplicates records | Python (BeautifulSoup4, Telethon) | Scheduled daily (cron / APScheduler) or manual trigger | External Job Boards, Telegram Channel, PostgreSQL |
