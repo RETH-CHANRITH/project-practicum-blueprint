@@ -67,38 +67,51 @@ def _normalize_location(text_lower: str) -> str:
 
 def _parse_salary_from_text(text: str) -> Tuple[Optional[float], Optional[float], bool]:
     """
-    Extract salary range from Telegram post text.
+    Extract salary range from Telegram or web post text.
     Returns (salary_min, salary_max, is_negotiable).
-    Examples: '$500-$800', 'USD 600', '$300+', 'negotiable'
+    Handles both English and Khmer patterns:
+      - '300-500$', '300 to 500$', '$300 - $500', '300$ - 500$'
+      - Khmer numerals & text: 'ប្រាក់ខែ: ៣០០ ដល់ ៥០០$', '៣០០ - ៥០០ ដុល្លារ'
+      - 'negotiable', 'competitive', 'ចរចា'
     """
     salary_min = None
     salary_max = None
-    is_negotiable = False
-
     text_lower = text.lower()
-    if "negotiable" in text_lower or "competitive" in text_lower:
-        is_negotiable = True
+    is_negotiable = any(w in text_lower for w in ["negotiable", "competitive", "ចរចា"])
 
-    # Pattern: $500 - $800 | $500-$800 | USD 500-800
+    # Translate Khmer numerals (០-៩) to Arabic digits (0-9)
+    khmer_digits = str.maketrans("០១២៣៤៥៦៧៨៩", "0123456789")
+    cleaned = text.translate(khmer_digits)
+
+    # Clean commas inside numbers like 1,200 -> 1200
+    cleaned = re.sub(r"(\d),(\d)", r"\1\2", cleaned)
+
+    # 1. Flexible Range pattern: handles English ('to', '-') and Khmer ('ដល់', '-')
     range_match = re.search(
-        r'(?:usd|\$)\s*(\d{2,5})\s*[-–to]+\s*(?:usd|\$)?\s*(\d{2,5})',
-        text, re.IGNORECASE
+        r"(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?\s*(?:[-–—~]|to|ដល់)\s*(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?",
+        cleaned, re.IGNORECASE
     )
     if range_match:
-        salary_min = float(range_match.group(1))
-        salary_max = float(range_match.group(2))
-        return salary_min, salary_max, is_negotiable
+        full_match = range_match.group(0).lower()
+        if any(c in full_match for c in ["$", "usd", "ដុល្លារ"]) or any(k in text_lower for k in ["salary", "ប្រាក់ខែ", "ប្រាក់បៀវត្ស"]):
+            min_val = float(range_match.group(1))
+            max_val = float(range_match.group(2))
+            if min_val <= max_val:
+                return min_val, max_val, is_negotiable
 
-    # Pattern: $500+ or $500/month
+    # 2. Single number pattern: $500+, 500$, 500 ដុល្លារ, $500/month
     single_match = re.search(
-        r'(?:usd|\$)\s*(\d{2,5})(?:\+|/month|/mo|k)?',
-        text, re.IGNORECASE
+        r"(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?(?:\+|/month|/mo|k)?",
+        cleaned, re.IGNORECASE
     )
     if single_match:
-        val = float(single_match.group(1))
-        salary_min = val
-        salary_max = val * 1.3  # rough upper estimate
-        return salary_min, salary_max, is_negotiable
+        full_single = single_match.group(0).lower()
+        if any(c in full_single for c in ["$", "usd", "ដុល្លារ"]) or any(k in text_lower for k in ["salary", "ប្រាក់ខែ", "ប្រាក់បៀវត្ស"]):
+            val = float(single_match.group(1))
+            if val >= 50:  # Avoid matching small numbers like '2 vacancies'
+                salary_min = val
+                salary_max = val * 1.3  # rough upper estimate
+                return salary_min, salary_max, is_negotiable
 
     return None, None, is_negotiable
 

@@ -4,13 +4,13 @@
 
 **Golden Rule:** An endpoint must pass in your API test collection before you build a screen that uses it.
 
-**Status:** Submitted · **Last updated:** 2026-10-24
+**Status:** Submitted · **Last updated:** 2026-11-09
 
 ## Done When
 
 - [x] Every Phase 3.4 endpoint appears in the matrix
 - [x] Every Must-Have endpoint shows PASS and has at least one passing error-case test
-- [x] The test run report is saved and verified (58/58 tests passing)
+- [x] The test run report is saved and verified (80/80 tests passing)
 - [x] The test collection in `api-specs/` is up to date
 
 ## 1. Test Run
@@ -18,9 +18,9 @@
 | Item | Value |
 |---|---|
 | API testing tool | Pytest (HTTPX / TestClient) + Postman/Bruno Collection |
-| How you ran the whole collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (70 tests) |
-| Test suite result | 70 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
-| Date | 2026-11-02 |
+| How you ran the whole collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (80 tests) |
+| Test suite result | 80 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
+| Date | 2026-11-09 |
 | Test collection file | `api-specs/jobmatch_api_collection.json` |
 
 ## 2. API Verification Matrix
@@ -44,6 +44,10 @@
 | EP-15 | POST | `/api/v1/auth/otp/verify` | Must | PASS | EP-15 Verify Email OTP | `{"message":"OTP verified","access_token":"..."}` |
 | EP-16 | GET | `/api/v1/sources` | Must | PASS | EP-16 List Sources | `[{"id":1,"name":"Internships Cambodia"}]` |
 | EP-17 | GET | `/api/v1/sources/{id}` | Must | PASS | EP-17 Get Source Detail | `{"id":1,"name":"Internships Cambodia"}` |
+| EP-18 | GET | `/api/v1/companies` | Must | PASS | EP-18 List Companies | `[{"id":1,"name":"ABA Bank"}]` |
+| EP-19 | GET | `/api/v1/companies/{id}` | Must | PASS | EP-19 Get Company Detail | `{"id":1,"name":"Smart Axiata"}` |
+| EP-20 | GET | `/api/v1/companies/{id}/jobs` | Must | PASS | EP-20 Get Company Jobs | `[{"id":1,"title":"Credit Officer"}]` |
+| INGEST| POST | `/api/v1/jobs/ingest` | Must | PASS | Ingest Job API | `{"status":"inserted","canonical_id":1}` |
 
 ## 3. Negative Cases
 

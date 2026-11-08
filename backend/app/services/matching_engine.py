@@ -204,6 +204,89 @@ SKILL_ALIASES: Dict[str, str] = {
     "artificial intelligence": "artificial intelligence",
     "nlp": "nlp",
     "deep learning": "deep learning",
+
+    # Finance & Accounting
+    "accounting": "accounting",
+    "accountant": "accounting",
+    "bookkeeping": "bookkeeping",
+    "quickbooks": "quickbooks",
+    "financial reporting": "financial reporting",
+    "financial analysis": "financial analysis",
+    "auditing": "auditing",
+    "audit": "auditing",
+    "tax": "tax compliance",
+    "tax compliance": "tax compliance",
+    "taxation": "tax compliance",
+    "payroll": "payroll management",
+    "payroll management": "payroll management",
+
+    # Banking & Microfinance
+    "credit analysis": "credit analysis",
+    "credit assessment": "credit analysis",
+    "credit officer": "credit analysis",
+    "loan processing": "loan processing",
+    "loan officer": "loan processing",
+    "teller": "teller operations",
+    "teller operations": "teller operations",
+    "kyc": "kyc compliance",
+    "kyc compliance": "kyc compliance",
+    "risk assessment": "risk assessment",
+
+    # Marketing & Digital Media
+    "digital marketing": "digital marketing",
+    "social media": "social media management",
+    "social media marketing": "social media management",
+    "social media management": "social media management",
+    "seo": "seo",
+    "search engine optimization": "seo",
+    "content marketing": "content marketing",
+    "content creation": "content marketing",
+    "copywriting": "copywriting",
+    "google ads": "google ads",
+    "facebook ads": "facebook ads",
+    "brand strategy": "brand strategy",
+
+    # Design & Creative
+    "graphic design": "graphic design",
+    "graphic designer": "graphic design",
+    "ui/ux": "ui/ux",
+    "ui/ux design": "ui/ux",
+    "figma": "figma",
+    "photoshop": "adobe photoshop",
+    "adobe photoshop": "adobe photoshop",
+    "illustrator": "adobe illustrator",
+    "adobe illustrator": "adobe illustrator",
+
+    # Sales & Business Development
+    "sales": "b2b sales",
+    "b2b sales": "b2b sales",
+    "b2c sales": "retail sales",
+    "retail sales": "retail sales",
+    "business development": "business development",
+    "lead generation": "lead generation",
+    "negotiation": "negotiation",
+    "crm": "crm",
+    "customer relationship management": "crm",
+
+    # Human Resources & Administration
+    "hr": "human resources",
+    "human resources": "human resources",
+    "recruitment": "recruitment",
+    "talent acquisition": "recruitment",
+    "labor law": "labor law compliance",
+    "labor law compliance": "labor law compliance",
+    "office administration": "office administration",
+    "admin": "office administration",
+
+    # General & Professional Skills
+    "excel": "microsoft excel",
+    "microsoft excel": "microsoft excel",
+    "ms excel": "microsoft excel",
+    "english": "english communication",
+    "english communication": "english communication",
+    "khmer": "khmer communication",
+    "khmer communication": "khmer communication",
+    "customer service": "customer service",
 }
 
 

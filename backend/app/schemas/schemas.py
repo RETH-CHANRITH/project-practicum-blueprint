@@ -326,7 +326,9 @@ class CompanyDetailResponse(CompanyResponse):
 
 
 class CompanyResolveRequest(BaseModel):
-    raw_name: str = Field(..., min_length=1, description="Raw company name string extracted from scraper")
+    raw_name: Optional[str] = Field(None, description="Raw company name string extracted from scraper")
+    company: Optional[str] = Field(None, description="Alternative field for company name")
+    name: Optional[str] = Field(None, description="Alternative field for company name")
     source_id: Optional[int] = None
 
 
@@ -336,4 +338,38 @@ class CompanyResolveResponse(BaseModel):
     resolved: bool
     is_new: bool
     company: Optional[CompanyResponse] = None
+
+
+class JobIngestRequest(BaseModel):
+    title: str = Field(..., description="Job title")
+    company: str = Field(..., description="Company name")
+    location: Optional[str] = "Phnom Penh"
+    description: Optional[str] = ""
+    source: Optional[str] = "Telegram"
+    source_url: Optional[str] = None
+    salary_min: Optional[float] = None
+    salary_max: Optional[float] = None
+    salary_currency: Optional[str] = "USD"
+    is_negotiable: Optional[bool] = False
+    job_type: Optional[str] = "full-time"
+    experience_level: Optional[str] = "entry"
+    work_arrangement: Optional[str] = "on-site"
+    apply_email: Optional[str] = None
+    apply_phone: Optional[str] = None
+    apply_telegram: Optional[str] = None
+    skills: List[str] = Field(default_factory=list)
+
+
+class JobIngestResponse(BaseModel):
+    job_id: int
+    title: str
+    company: str
+    canonical_company_id: Optional[int] = None
+    is_duplicate: bool
+    duplicate_of: Optional[int] = None
+    job_category: str
+    job_subcategory: str
+    job_level: str
+    status: str
+
 

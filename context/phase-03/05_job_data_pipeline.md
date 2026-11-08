@@ -24,6 +24,14 @@
 
 ![Job Data Pipeline Diagram](../assets/job_data_pipeline_diagram.png)
 
+### 2.1 Dual-Phase AI Pipeline (Normalization vs Recommendation)
+
+The architecture explicitly decouples the two AI processing phases:
+1. **Phase 1: Ingestion, Normalization & Classification:** Raw posts from Telegram & Web ➔ Staging Tables (`telegram_jobs`, `web_jobs`) ➔ Text cleaning (`re`), Khmer numerals translation (`str.maketrans`), Semantic vocabulary normalization (`paraphrase-multilingual-MiniLM-L12-v2`), and taxonomy classification ➔ Canonical Master table (`job_listings`).
+2. **Phase 2: Dual-Metric AI Recommendation & Ranking:** Candidate Profile + Canonical Jobs ➔ 70% Skill Coverage + 30% Multilingual Semantic AI Similarity ➔ Personalized Feed ranked by Match Score % served to the Flutter Mobile App.
+
+![AI Normalization and Recommendation Flow](../assets/ai_normalization_and_recommendation_flow.png)
+
 ---
 
 ## 3. Pipeline Stages Breakdown
@@ -31,16 +39,18 @@
 The JobMatch Cambodia data pipeline operates in **5 sequential stages**:
 
 ### Stage 1: Job Data Types (Raw Input Sources)
-Recruitment opportunities in Cambodia are published across fragmented channels with varying structures:
+Recruitment opportunities in Cambodia are published across fragmented channels with varying structures. The platform aggregates from **two primary external sources** (with an optional Admin API ingestion path):
+
 1. **Telegram Channels (`@internshipscambodia`, `@camhr_jobs`):**
    - **Type:** Unstructured free-form text.
    - **Characteristics:** Written in mixed Khmer and English, containing decorative emojis (`🔥`, `⚡`, `📢`), unformatted salary strings, and inline contact handles without schema.
 2. **Web Job Portals (CamHR, BongThom, JobNet):**
    - **Type:** Semi-structured HTML DOM.
    - **Characteristics:** Job cards organized with CSS class selectors across paginated listing pages, containing job title, company name, salary range, and deadline.
-3. **Company Direct Post / API:**
+3. **Direct Admin / API Ingestion (`POST /api/v1/jobs/ingest`):**
    - **Type:** Structured JSON payload.
-   - **Characteristics:** Pre-validated key-value pairs submitted by verified employers via the JobMatch employer portal (`POST /api/v1/jobs/ingest`).
+   - **Characteristics:** Clean key-value pairs submitted by external automation workflows (e.g. n8n) or the system `admin`. 
+   - **Important Scope Rule:** There is **NO employer portal or company login**. The platform strictly enforces **two roles only** (`user` for candidates and `admin` for system management). Employer registration is explicitly out of scope.
 
 ---
 
@@ -304,7 +314,7 @@ The system preserves original information collected from each platform rather th
 To track platform provenance at high scale, the architectural model specifies:
 - `id`: Unique source identity key
 - `job_id`: Foreign key referencing canonical `job_listings.id`
-- `source`: Telegram, CamHR, JobNet, Direct Employer
+- `source`: Telegram, Web (CamHR, BongThom, JobNet), Direct API
 - `source_job_id`: Original posting ID on source platform
 - `source_url`: Original posting URL
 - `original_title`: Raw unnormalized title

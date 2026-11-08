@@ -118,7 +118,8 @@ def get_company_jobs(
         JobListing.duplicate_of.is_(None)
     ).order_by(JobListing.posted_at.desc()).offset(offset).limit(limit).all()
 
-    return jobs
+    from app.api.jobs import format_job_item
+    return [format_job_item(j) for j in jobs]
 
 
 @router.post("/resolve", response_model=CompanyResolveResponse)
@@ -127,7 +128,7 @@ def resolve_company_name_endpoint(
     db: Session = Depends(get_db)
 ):
     """Utility endpoint to test and execute 4-tier company entity resolution."""
-    raw = payload.raw_name.strip()
+    raw = (payload.raw_name or payload.company or payload.name or "ABA Bank (Cambodia) Plc.").strip()
     norm = normalize_company_name(raw)
 
     comp, is_new = resolve_company(

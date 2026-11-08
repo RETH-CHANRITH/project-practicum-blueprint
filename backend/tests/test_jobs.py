@@ -81,3 +81,54 @@ def test_saved_jobs_flow_ep10_ep11_ep12():
     list_after = client.get("/api/v1/saved-jobs", headers=headers)
     assert list_after.status_code == 200
     assert job_id not in [item["job"]["id"] for item in list_after.json()]
+
+
+def test_job_ingest_api_flow():
+    """Verify POST /api/v1/jobs/ingest with company entity resolution and deduplication"""
+    import uuid
+    from app.core.database import SessionLocal
+    from app.models.models import JobListing, Company
+
+    unique_suffix = uuid.uuid4().hex[:6]
+    title = f"Senior Flutter Engineer {unique_suffix}"
+    company = f"UniqueIngestCorp {unique_suffix}"
+
+    payload = {
+        "title": title,
+        "company": company,
+        "location": "Phnom Penh",
+        "salary_min": 800.0,
+        "salary_max": 1500.0,
+        "salary_currency": "USD",
+        "description": "Unique company looking for experienced Flutter developer in Phnom Penh",
+        "skills": ["Flutter", "Dart", "REST API"],
+        "job_type": "full-time",
+        "experience_level": "mid"
+    }
+
+    try:
+        # 1. First ingestion (Unique Job)
+        res1 = client.post("/api/v1/jobs/ingest", json=payload)
+        assert res1.status_code == 201, res1.text
+        data1 = res1.json()
+        assert data1["title"] == title
+        assert data1["is_duplicate"] is False
+        assert data1["status"] == "created"
+        assert data1["canonical_company_id"] is not None
+
+        # 2. Second ingestion of the same job (Duplicate Detection)
+        res2 = client.post("/api/v1/jobs/ingest", json=payload)
+        assert res2.status_code == 201, res2.text
+        data2 = res2.json()
+        assert data2["is_duplicate"] is True
+        assert data2["status"] in ["merged_duplicate", "existing_duplicate"]
+    finally:
+        # Cleanup test records
+        db = SessionLocal()
+        try:
+            db.query(JobListing).filter(JobListing.company.ilike(f"%{company}%")).delete()
+            db.query(Company).filter(Company.name.ilike(f"%{company}%")).delete()
+            db.commit()
+        finally:
+            db.close()
+
