@@ -4,13 +4,13 @@
 
 **Golden Rule:** An endpoint must pass in your API test collection before you build a screen that uses it.
 
-**Status:** Submitted · **Last updated:** 2026-11-09
+**Status:** Submitted · **Last updated:** 2026-11-10
 
 ## Done When
 
 - [x] Every Phase 3.4 endpoint appears in the matrix
 - [x] Every Must-Have endpoint shows PASS and has at least one passing error-case test
-- [x] The test run report is saved and verified (80/80 tests passing)
+- [x] The test run report is saved and verified (88/88 tests passing)
 - [x] The test collection in `api-specs/` is up to date
 
 ## 1. Test Run
@@ -18,9 +18,9 @@
 | Item | Value |
 |---|---|
 | API testing tool | Pytest (HTTPX / TestClient) + Postman/Bruno Collection |
-| How you ran the whole collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (80 tests) |
-| Test suite result | 80 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
-| Date | 2026-11-09 |
+| How you ran the whole collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (88 tests) |
+| Test suite result | 88 passed, 0 failed, 1 warning (OpenSSL warning on macOS) |
+| Date | 2026-11-10 |
 | Test collection file | `api-specs/jobmatch_api_collection.json` |
 
 ## 2. API Verification Matrix
@@ -68,3 +68,16 @@
 | EP-15 | Verify OTP reusing an already-used code | 400 | PASS | Returns `BAD_REQUEST: No active OTP request` |
 | DEDUP | Phishing fake post with same title but fake contacts | N/A | PASS | Verified in `test_dedup.py`: Contacts in real job are NEVER overwritten |
 | DEDUP | Scrape duplicate post from same source/post_id twice | N/A | PASS | Verified in `test_dedup.py`: Row is updated idempotently with unique constraint |
+
+## 4. Normalization Pipeline & RBAC Security Tests (Added 2026-11-10)
+
+| Module / Scope | Test Case Function | Status | Verified Functionality |
+|---|---|:---:|---|
+| **Salary Parsing** | `test_parse_salary_dual_currency_and_periods` | PASS | Dual-currency (USD & KHR `៛`/`រៀល`), period extraction (`hourly`, `daily`, `monthly`, `yearly`), and exact single-salary preservation (no arbitrary 1.3x inflation) |
+| **Location Normalization** | `test_location_normalization_all_25_provinces` | PASS | All 25 Cambodian provinces/capital mapped in English and Khmer, unspaced Khmer substring containment (`\u1780`–`\u17ff`), word boundaries for Latin acronyms (`PP`, `SR`) |
+| **Bilingual Classification** | `test_bilingual_classification_khmer_rules` | PASS | Rule-based Khmer classification across Administration, Education, Healthcare, Accounting, IT, and seniority levels (`Internship`, `Junior`, `Senior`, `Manager`) |
+| **Cross-Industry Skills** | `test_multi_industry_skills_mapping` | PASS | Multi-industry extraction (Nursing, F&B, QuickBooks, Credit Analysis, Flutter) with Khmer aliases |
+| **Title Normalization** | `test_dedup_title_normalization_khmer` | PASS | Khmer title equivalence mapping (`អ្នកហាត់ការ` -> `intern`, `គ្រូបង្រៀន` -> `teacher`) for cross-language deduplication |
+| **Candidate RBAC** | `test_candidate_access_and_admin_forbidden` | PASS | Candidate (`role="user"`) access to candidate endpoints, strictly forbidden (403 Forbidden) on administrative scrape endpoints |
+| **Admin RBAC** | `test_admin_full_access` | PASS | Administrator (`role="admin"`) full access to administrative scrape endpoints (200 OK) |
+| **Zero Employers** | `test_zero_employer_accounts_enforced` | PASS | Database query verification ensuring 0 accounts with `role="employer"` or `role="company"` exist in the database |

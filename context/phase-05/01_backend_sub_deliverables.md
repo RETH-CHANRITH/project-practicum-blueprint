@@ -2,11 +2,11 @@
 
 **Objective:** Build the backend in four small, verifiable pieces so that you always have something working, and record how to rebuild the database from scratch.
 
-**Status:** Submitted · **Last updated:** 2026-11-09
+**Status:** Submitted · **Last updated:** 2026-11-10
 
 ## Done When
 
-- [x] SD-1 to SD-6 are Done, each with verification evidence
+- [x] SD-1 to SD-8 are Done, each with verification evidence
 - [x] Every Must-Have endpoint passes in your API test collection (shown in Phase 5.2)
 - [x] The runbook rebuilds the database from scratch (reset, migrate, seed) on a fresh clone
 - [x] No real secrets are committed; `backend/.env.example` lists every variable
@@ -21,6 +21,8 @@
 | SD-4 | Complex business logic & AI matching | Dual-metric AI job recommendation engine (`required_skill_coverage` + `semantic_similarity` -> `ranking_score`), data cleaning pipeline, background auto-scraper, 3-tier cross-source dedup with anti-phishing protection | EP-01, EP-09, EP-13 | 2026-10-18 | Done | `backend/app/services/matching_engine.py`, `dedup_manager.py`, `importer.py`, `scheduler.py` |
 | SD-5 | Canonical Company Management & Entity Resolution | 3NF canonical `companies` and `company_aliases` tables, fuzzy/alias resolver with anti-unsafe merging, auto-linking during deduplication, endpoints EP-18 to EP-20 | EP-18, EP-19, EP-20 | 2026-11-04 | Done | `backend/app/models/models.py`, `company_resolver.py`, `api/companies.py`, `test_company_resolver.py`, `test_companies_api.py` |
 | SD-6 | Universal Multi-Industry & Seniority Expansion | Catalog expanded to 50 skills across Banking, Accounting, Marketing, HR, Sales, Design, IT, Languages; universal personas (entry, mid, senior); verified multi-industry live AI matching | EP-06, EP-07, EP-09 | 2026-11-09 | Done | `backend/seed.py`, `backend/app/services/matching_engine.py`, `tests/test_jobs.py` |
+| SD-7 | Bilingual Normalization & Salary/Location Pipeline | Dual-currency USD & KHR (`៛`, `រៀល`), period extraction (`hourly`, `daily`, `monthly`, `yearly`), exact single salary preservation (no 1.3x inflation), 25-province bilingual registry with unspaced Khmer containment | EP-07, EP-08, EP-13 | 2026-11-09 | Done | `backend/app/services/scraper.py`, `backend/app/services/job_classifier.py`, `tests/test_bilingual_normalization.py` |
+| SD-8 | Strict 2-Role System & RBAC Security Verification | Candidate (`user`) and Administrator (`admin`) role boundary verification; candidate blocked from admin endpoints (403 Forbidden); verification of 0 employer accounts in database | EP-02, EP-03, EP-13 | 2026-11-09 | Done | `backend/app/api/deps.py`, `tests/test_roles_rbac.py` |
 
 ## 2. Implementation Notes
 
@@ -32,6 +34,8 @@
   - Background async scheduler polls and syncs active channels on an hourly schedule (every 60 minutes) non-blockingly.
   - Cross-source deduplication engine uses 3-tier matching (`dedup_hash` SHA-256, contact matching, and title/company fuzzy matching) with anti-phishing isolation (contacts from duplicates are never copied into the primary job).
   - Jev Structured Job Classification (`backend/app/services/job_classifier.py`): Integrates TypeSafe AI Jev API spec with deterministic Python rule-based fallback. Since TypeSafe AI requires commercial prepaid billing (\$5 minimum with no automated student tier), the system operates on the verified local fallback engine pending advisor consultation.
+- **SD-7 (Bilingual Normalization Pipeline):** Comprehensive dual-currency parsing supporting USD and KHR (`៛`, `រៀល`), period detection (`hourly`, `daily`, `monthly`, `yearly`), and exact single salary preservation (no arbitrary 1.3x multiplier inflation). Location normalization covers all 25 Cambodian provinces/capital using substring containment for unspaced Khmer text (`\u1780`–`\u17ff`) and word-boundary matching for Latin abbreviations (`PP`, `SR`).
+- **SD-8 (RBAC Enforcement & Two-Role System):** Enforces a strict two-role boundary: `user` (candidate) and `admin` (system administrator), with 0 employer accounts. Verified through automated tests (`test_roles_rbac.py`) ensuring candidates receive 403 Forbidden on administrative endpoints.
 
 ## 3. Environment & Database Migration Runbook
 
@@ -43,7 +47,7 @@
 | Create tables & run seeds | `cd backend && python seed.py` |
 | Reset the database | `docker compose down -v && docker compose up -d db && cd backend && alembic upgrade head && python seed.py` |
 | Start the API on port 8000 | `cd backend && uvicorn main:app --reload --port 8000` |
-| Run the API test collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (80 tests) |
+| Run the API test collection | `PYTHONPATH=. tests/venv/bin/pytest tests/ -v` (88 tests) |
 | Check health endpoint | `curl http://localhost:8000/api/v1/health` |
 
 ### Seeded Test Accounts (Local Testing Only):
