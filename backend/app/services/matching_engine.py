@@ -278,7 +278,50 @@ SKILL_ALIASES: Dict[str, str] = {
     "office administration": "office administration",
     "admin": "office administration",
 
-    # General & Professional Skills
+    # Healthcare & Medicine
+    "nursing": "nursing",
+    "nurse": "nursing",
+    "pharmacy": "pharmacy",
+    "pharmacist": "pharmacy",
+    "patient care": "patient care",
+    "medical lab": "medical laboratory",
+    "clinical diagnosis": "clinical diagnosis",
+
+    # Hospitality, Tourism & Food Service
+    "barista": "barista operations",
+    "culinary arts": "culinary arts",
+    "cooking": "culinary arts",
+    "chef": "culinary arts",
+    "food safety": "food safety compliance",
+    "front desk": "hotel front desk",
+    "hotel management": "hotel management",
+    "housekeeping": "housekeeping operations",
+    "tour guiding": "tour guiding",
+
+    # Construction & Civil Engineering
+    "autocad": "autocad",
+    "civil engineering": "civil engineering",
+    "surveying": "surveying",
+    "structural design": "structural design",
+    "site safety": "site safety supervision",
+    "hvac": "hvac",
+    "electrical wiring": "electrical wiring",
+
+    # Manufacturing & Garments
+    "quality control": "quality control (aql)",
+    "qa": "quality control (aql)",
+    "pattern making": "pattern making",
+    "industrial sewing": "industrial sewing",
+    "textile inspection": "textile inspection",
+
+    # Education & Academic
+    "teaching": "teaching",
+    "teacher": "teaching",
+    "lesson planning": "lesson planning",
+    "curriculum development": "curriculum development",
+    "classroom management": "classroom management",
+
+    # General, Languages & Khmer Skills
     "excel": "microsoft excel",
     "microsoft excel": "microsoft excel",
     "ms excel": "microsoft excel",
@@ -287,6 +330,12 @@ SKILL_ALIASES: Dict[str, str] = {
     "khmer": "khmer communication",
     "khmer communication": "khmer communication",
     "customer service": "customer service",
+    "គណនេយ្យ": "accounting",
+    "ភាសាអង់គ្លេស": "english communication",
+    "សរសេរកូដ": "software engineering",
+    "លក់": "b2b sales",
+    "បង្រៀន": "teaching",
+    "ពេទ្យ": "nursing",
 }
 
 

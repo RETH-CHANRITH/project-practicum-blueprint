@@ -108,7 +108,7 @@ def rule_based_classify(title: str, description: str, company: str = "") -> Dict
     category = "Unknown"
     subcategory = "Unknown"
 
-    if re.search(r'\b(developer|software|programmer|flutter|dart|react|python|backend|frontend|java|devops|network|sysadmin|cyber|ui/ux|figma|database|it support|it specialist|coder)\b', text):
+    if re.search(r'\b(developer|software|programmer|flutter|dart|react|python|backend|frontend|java|devops|network|sysadmin|cyber|ui/ux|figma|database|it support|it specialist|coder)\b|អ្នកសរសេរកម្មវិធី|ព័ត៌មានវិទ្យា|អភិវឌ្ឍន៍', text):
         category = "Information Technology"
         if re.search(r'\b(flutter|dart|android|ios|react native|swift|kotlin|mobile)\b', text):
             subcategory = "Mobile Development"
@@ -132,62 +132,62 @@ def rule_based_classify(title: str, description: str, company: str = "") -> Dict
             subcategory = "Network Administration"
         else:
             subcategory = "Software Engineering"
-    elif re.search(r'\b(accountant|accounting|audit|tax|bookkeeper|finance|financial)\b', text):
+    elif re.search(r'\b(accountant|accounting|audit|tax|bookkeeper|finance|financial)\b|គណនេយ្យ|គណនេយ្យករ|ហិរញ្ញវត្ថុ|សវនកម្ម|ពន្ធដារ', text):
         category = "Finance & Accounting"
-    elif re.search(r'\b(bank|teller|loan officer|credit officer|mfi|microfinance)\b', text):
+    elif re.search(r'\b(bank|teller|loan officer|credit officer|mfi|microfinance)\b|ធនាគារ|ឥណទាន|មន្ត្រីឥណទាន|បេឡា|មីក្រូហិរញ្ញវត្ថុ', text):
         category = "Banking"
-    elif re.search(r'\b(marketing|social media|seo|content creator|copywriter|branding)\b', text):
+    elif re.search(r'\b(marketing|social media|seo|content creator|copywriter|branding)\b|ទីផ្សារ|ផ្សព្វផ្សាយ|ប្រព័ន្ធផ្សព្វផ្សាយ', text):
         category = "Marketing"
-    elif re.search(r'\b(sales|business development|outdoor sales|retail sales|account executive)\b', text):
+    elif re.search(r'\b(sales|business development|outdoor sales|retail sales|account executive)\b|លក់|បុគ្គលិកលក់|ផ្នែកលក់', text):
         category = "Sales"
-    elif re.search(r'\b(hr|human resource|recruitment|talent acquisition|payroll)\b', text):
+    elif re.search(r'\b(hr|human resource|recruitment|talent acquisition|payroll)\b|ធនធានមនុស្ស|ជ្រើសរើសបុគ្គលិក|ប្រាក់បៀវត្ស', text):
         category = "Human Resources"
-    elif re.search(r'\b(admin|administration|receptionist|clerk|office assistant)\b', text):
+    elif re.search(r'\b(admin|administration|receptionist|clerk|office assistant)\b|រដ្ឋបាល|ស្មៀន|ទទួលភ្ញៀវ', text):
         category = "Administration"
-    elif re.search(r'\b(teacher|teaching|lecturer|instructor|curriculum|academic|tutor)\b', text):
+    elif re.search(r'\b(teacher|teaching|lecturer|instructor|curriculum|academic|tutor)\b|គ្រូបង្រៀន|បង្រៀន|សាស្ត្រាចារ្យ|អប់រំ', text):
         category = "Education"
-    elif re.search(r'\b(hotel|resort|front desk|f&b|tourist|tourism|waiter|chef)\b', text):
+    elif re.search(r'\b(hotel|resort|front desk|f&b|tourist|tourism|waiter|chef|barista|housekeeping)\b|សណ្ឋាគារ|ទេសចរណ៍|មេចុងភៅ|ភោជនីយដ្ឋាន|រត់តុ', text):
         category = "Hospitality & Tourism"
-    elif re.search(r'\b(nurse|doctor|pharmacist|medical|clinic|hospital)\b', text):
+    elif re.search(r'\b(nurse|doctor|pharmacist|medical|clinic|hospital|patient care|lab technician)\b|ពេទ្យ|វេជ្ជបណ្ឌិត|គិលានុបដ្ឋាយិកា|ឱសថការី|សុខាភិបាល|មន្ទីរពេទ្យ', text):
         category = "Healthcare"
-    elif re.search(r'\b(civil engineer|electrical engineer|mechanical engineer|architect)\b', text):
+    elif re.search(r'\b(civil engineer|electrical engineer|mechanical engineer|architect|autocad|construction|surveyor)\b|វិស្វករ|ស្ថាបត្យករ|សំណង់', text):
         category = "Engineering"
-    elif re.search(r'\b(customer service|call center|customer support|client care)\b', text):
+    elif re.search(r'\b(customer service|call center|customer support|client care)\b|សេវាអតិថិជន|ផ្នែកបម្រើអតិថិជន', text):
         category = "Customer Service"
-    elif re.search(r'\b(logistics|warehouse|shipping|procurement|supply chain)\b', text):
+    elif re.search(r'\b(logistics|warehouse|shipping|procurement|supply chain|inventory)\b|ឃ្លាំង|ដឹកជញ្ជូន|ស្តុក', text):
         category = "Logistics & Supply Chain"
 
     # Seniority Level heuristic
     level = "Unknown"
     title_lower = title.lower()
-    if re.search(r'\b(intern|internship|trainee|apprentice)\b', title_lower) or re.search(r'\b(intern|internship)\b', text):
+    if re.search(r'\b(intern|internship|trainee|apprentice)\b|អ្នកហាត់ការ|កម្មសិក្សា|កម្មសិក្សាការី', title_lower) or re.search(r'\b(intern|internship)\b|អ្នកហាត់ការ|កម្មសិក្សា', text):
         level = "Internship"
-    elif re.search(r'\b(fresh|graduate|entry|entry-level)\b', title_lower):
+    elif re.search(r'\b(fresh|graduate|entry|entry-level)\b|ទើបបញ្ចប់ការសិក្សា|គ្មានបទពិសោធន៍', title_lower):
         level = "Entry-level"
-    elif re.search(r'\b(junior|jr\.?)\b', title_lower):
+    elif re.search(r'\b(junior|jr\.?)\b|កម្រិតដំបូង|បទពិសោធន៍១ឆ្នាំ', title_lower):
         level = "Junior"
-    elif re.search(r'\b(director|head of|vp|chief)\b', title_lower):
+    elif re.search(r'\b(director|head of|vp|chief)\b|នាយក|អគ្គនាយក', title_lower):
         level = "Director"
-    elif re.search(r'\b(manager|lead|supervisor)\b', title_lower):
+    elif re.search(r'\b(manager|lead|supervisor)\b|អ្នកគ្រប់គ្រង|ប្រធានផ្នែក|ប្រធាន', title_lower):
         level = "Manager"
-    elif re.search(r'\b(senior|sr\.?|principal)\b', title_lower):
+    elif re.search(r'\b(senior|sr\.?|principal)\b|ចាស់ទុំ|បទពិសោធន៍ខ្ពស់', title_lower):
         level = "Senior"
     elif re.search(r'\b(mid|mid-level)\b', title_lower):
         level = "Mid-level"
     else:
         # Check description context
-        if re.search(r'\b(senior|5\+\s*years|4\+\s*years)\b', text):
+        if re.search(r'\b(senior|5\+\s*years|4\+\s*years)\b|បទពិសោធន៍៤ឆ្នាំ|បទពិសោធន៍៥ឆ្នាំ', text):
             level = "Senior"
-        elif re.search(r'\b(junior|1\s*year|fresh)\b', text):
+        elif re.search(r'\b(junior|1\s*year|fresh)\b|បទពិសោធន៍១ឆ្នាំ', text):
             level = "Junior"
 
     # Work arrangement heuristic
     arrangement = "Unknown"
-    if re.search(r'\b(remote|work from home|wfh|telecommute)\b', text):
+    if re.search(r'\b(remote|work from home|wfh|telecommute)\b|ធ្វើការពីផ្ទះ', text):
         arrangement = "Remote"
-    elif re.search(r'\b(hybrid|flexible)\b', text):
+    elif re.search(r'\b(hybrid|flexible)\b|ចម្រុះ', text):
         arrangement = "Hybrid"
-    elif re.search(r'\b(on-site|onsite|office based|in office)\b', text):
+    elif re.search(r'\b(on-site|onsite|office based|in office)\b|នៅការិយាល័យ', text):
         arrangement = "On-site"
 
     return {

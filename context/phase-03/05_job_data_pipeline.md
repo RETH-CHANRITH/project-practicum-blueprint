@@ -39,34 +39,35 @@ The architecture explicitly decouples the two AI processing phases:
 The JobMatch Cambodia data pipeline operates in **5 sequential stages**:
 
 ### Stage 1: Job Data Types (Raw Input Sources)
-Recruitment opportunities in Cambodia are published across fragmented channels with varying structures. The platform aggregates from **two primary external sources** (with an optional Admin API ingestion path):
+Recruitment opportunities in Cambodia are published across fragmented channels with varying structures. The platform aggregates exclusively from **two external scraped sources**:
 
-1. **Telegram Channels (`@internshipscambodia`, `@camhr_jobs`):**
+1. **Telegram Public Channels (`@internshipscambodia`, `@camhr_jobs`, etc.):**
    - **Type:** Unstructured free-form text.
    - **Characteristics:** Written in mixed Khmer and English, containing decorative emojis (`🔥`, `⚡`, `📢`), unformatted salary strings, and inline contact handles without schema.
-2. **Web Job Portals (CamHR, BongThom, JobNet):**
+   - **Provenance:** Aggregator / Get Source only. Captured via MTProto.
+2. **Web Job Portals (CamHR, BongThom, JobNet, etc.):**
    - **Type:** Semi-structured HTML DOM.
    - **Characteristics:** Job cards organized with CSS class selectors across paginated listing pages, containing job title, company name, salary range, and deadline.
-3. **Direct Admin / API Ingestion (`POST /api/v1/jobs/ingest`):**
-   - **Type:** Structured JSON payload.
-   - **Characteristics:** Clean key-value pairs submitted by external automation workflows (e.g. n8n) or the system `admin`. 
-   - **Important Scope Rule:** There is **NO employer portal or company login**. The platform strictly enforces **two roles only** (`user` for candidates and `admin` for system management). Employer registration is explicitly out of scope.
+   - **Provenance:** Aggregator / Get Source only. Captured via HTTP crawler.
+
+> [!IMPORTANT]
+> **Strict 2-Role & Aggregator Scope:** There is **NO employer portal, NO recruiter login, and NO company direct posting**. The system strictly operates on **two roles only** (`user` for candidates/students and `admin` for pipeline management). Companies exist solely as canonical entities attached to scraped postings.
 
 ---
 
-### Stage 2: Scraping & Ingestion Engine
-Handles automated data collection and staging:
-1. **Telegram Scraper (`backend/app/services/scraper.py`):**
+### Stage 2: Scraping Engine [Data Extraction]
+Handles automated data collection from the two external sources:
+1. **Telegram Scraper Engine (`backend/app/services/scraper.py`):**
    - Built on `Telethon` (MTProto client protocol).
    - Listens to incoming messages in real time from public Cambodian job channels.
    - Extracts raw message text, timestamp, channel ID, and media links.
 2. **Web Crawler Engine (`requests` + `BeautifulSoup4`):**
-   - Sends automated HTTP requests to job boards.
+   - Sends automated HTTP requests to Cambodian job boards.
    - Traverses pagination links and parses target HTML DOM tags with CSS selectors.
    - Applies rate-limiting and exponential backoff retry mechanisms to respect web policies.
-3. **Raw Payload Storage Layer:**
-   - All three incoming streams converge into a raw ingestion table before any destructive processing.
-   - Preserves `raw_payload`, `source_type` (`telegram` | `camhr` | `direct`), and `source_url` for full auditability and traceability.
+3. **Raw Payload Storage Layer (All Scraped Sources Converge Here):**
+   - Both scraped incoming streams converge into a raw staging table before any destructive processing.
+   - Preserves `raw_payload`, `source_type` (`telegram` | `web_portal`), and `source_url` for full auditability and traceability.
 
 ---
 
@@ -314,7 +315,7 @@ The system preserves original information collected from each platform rather th
 To track platform provenance at high scale, the architectural model specifies:
 - `id`: Unique source identity key
 - `job_id`: Foreign key referencing canonical `job_listings.id`
-- `source`: Telegram, Web (CamHR, BongThom, JobNet), Direct API
+- `source`: Telegram (`telegram`), Web Portals (`web_portal` - CamHR, BongThom, JobNet)
 - `source_job_id`: Original posting ID on source platform
 - `source_url`: Original posting URL
 - `original_title`: Raw unnormalized title
@@ -505,7 +506,7 @@ Apply CV to: @aba_recruitment or hr@ababank.com
 
 | Pipeline Stage | Function / Responsibility | Key Code Files |
 |---|---|---|
-| **1. Input Ingestion** | Multi-channel collection (Telegram, Web, Direct) | `backend/app/services/scraper.py`, `backend/app/api/jobs.py` |
+| **1. Input Ingestion** | Two-channel scraped collection (Telegram & Web Portals) | `backend/app/services/scraper.py` |
 | **2. Text Normalization** | Regex sanitization, corporate suffix stripping | `backend/app/services/dedup_manager.py` (`normalize_text_for_matching`) |
 | **3. Deterministic Parsing** | Salary ranges, canonical cities, ISO deadlines | `backend/app/services/scraper.py` (`_parse_salary_from_text`) |
 | **4. AI Classification** | Categorization & seniority level prediction | `backend/app/services/job_classifier.py` (`classify_job_fields`) |

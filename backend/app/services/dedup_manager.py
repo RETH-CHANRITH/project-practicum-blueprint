@@ -47,12 +47,28 @@ def normalize_text_for_matching(text: Optional[str]) -> str:
     s = re.sub(r'^\s*(?:urgent|hiring|immediate|announcement|we\s+are\s+looking\s+for|vacancy|hot\s*job)\s*[:\-–\s]*', '', s, flags=re.IGNORECASE)
     # Strip site name suffixes (e.g. " - BongThom", " | JobNet")
     s = re.sub(r'\s*[-|–]\s*(?:BongThom|JobNet|CamboJob|Khmer24|Telegram|Careers|Jobs).*$', '', s, flags=re.IGNORECASE)
-    # Standardize common tech job abbreviations
+    # Standardize common cross-industry job abbreviations
     s = re.sub(r'\bdevs?\b', 'developer', s, flags=re.IGNORECASE)
     s = re.sub(r'\bsr\.?\b', 'senior', s, flags=re.IGNORECASE)
     s = re.sub(r'\bjr\.?\b', 'junior', s, flags=re.IGNORECASE)
     s = re.sub(r'\beng\.?\b', 'engineer', s, flags=re.IGNORECASE)
     s = re.sub(r'\bmgr\.?\b', 'manager', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bacct\.?\b|\bacctng\b', 'accountant', s, flags=re.IGNORECASE)
+    s = re.sub(r'\basst\.?\b', 'assistant', s, flags=re.IGNORECASE)
+    s = re.sub(r'\bexec\.?\b', 'executive', s, flags=re.IGNORECASE)
+    s = re.sub(r'\badmin\.?\b', 'administrator', s, flags=re.IGNORECASE)
+    s = re.sub(r'\btech\.?\b', 'technician', s, flags=re.IGNORECASE)
+    s = re.sub(r'\brep\.?\b', 'representative', s, flags=re.IGNORECASE)
+
+    # Standardize Khmer job title equivalents for cross-language matching
+    s = re.sub(r'អ្នកហាត់ការ|កម្មសិក្សាការី|កម្មសិក្សា', 'intern', s)
+    s = re.sub(r'គ្រូបង្រៀន|សាស្ត្រាចារ្យ', 'teacher', s)
+    s = re.sub(r'គណនេយ្យករ|គណនេយ្យ', 'accountant', s)
+    s = re.sub(r'វិស្វករ', 'engineer', s)
+    s = re.sub(r'អ្នកលក់|បុគ្គលិកលក់', 'sales', s)
+    s = re.sub(r'អ្នកគ្រប់គ្រង|ប្រធានផ្នែក', 'manager', s)
+    s = re.sub(r'វេជ្ជបណ្ឌិត|គ្រូពេទ្យ|គិលានុបដ្ឋាយិកា', 'nurse', s)
+
     # Collapse multiple spaces
     s = re.sub(r'\s+', ' ', s).strip().lower()
     return s
@@ -237,6 +253,14 @@ def merge_into_main_job(
     if len(inc_desc) > len(main_job.description or ""):
         main_job.description = inc_desc
 
+    # Classification: enrich if main job was Unknown
+    if (not main_job.job_category or main_job.job_category == "Unknown") and incoming.get("job_category") and incoming.get("job_category") != "Unknown":
+        main_job.job_category = incoming["job_category"]
+        main_job.job_subcategory = incoming.get("job_subcategory") or main_job.job_subcategory
+        main_job.job_level = incoming.get("job_level") or main_job.job_level
+        main_job.classification_confidence = incoming.get("classification_confidence")
+        main_job.classification_source = incoming.get("classification_source", "rule")
+
     # Skills: sync any new skills from incoming job
     inc_skills = incoming.get("skills") or []
     existing_skill_ids = {js.skill_id for js in main_job.skills}
@@ -349,6 +373,11 @@ def save_job_with_dedup(
         apply_phone=job_data.get("apply_phone"),
         apply_telegram=job_data.get("apply_telegram"),
         work_arrangement=job_data.get("work_arrangement") or "on-site",
+        job_category=job_data.get("job_category") or "Unknown",
+        job_subcategory=job_data.get("job_subcategory") or "Unknown",
+        job_level=job_data.get("job_level") or "Unknown",
+        classification_confidence=job_data.get("classification_confidence"),
+        classification_source=job_data.get("classification_source") or "rule",
         posted_at=job_data.get("posted_at") or date.today(),
         deadline=job_data.get("deadline"),
         dedup_hash=dedup_hash,

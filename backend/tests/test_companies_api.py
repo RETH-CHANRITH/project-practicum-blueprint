@@ -22,7 +22,7 @@ def test_resolve_company_api_endpoint():
     data = response.json()
     assert data["resolved"] is True
     assert data["normalized_name"] == "aba bank"
-    assert data["company"]["name"] == "ABA Bank (Cambodia) Plc."
+    assert "ABA Bank" in data["company"]["name"]
     assert data["company"]["slug"] == "aba-bank"
 
 

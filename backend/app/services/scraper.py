@@ -47,73 +47,125 @@ def make_dedup_hash(title: str, company: str, location: str) -> str:
     return hashlib.sha256(raw_key.encode("utf-8")).hexdigest()[:64]
 
 
+CAMBODIA_PROVINCE_REGISTRY = {
+    "Phnom Penh": ["phnom penh", "phnompenh", "ភ្នំពេញ", "រាជធានីភ្នំពេញ", "pp"],
+    "Siem Reap": ["siem reap", "siemreap", "សៀមរាប", "ក្រុងសៀមរាប", "sr"],
+    "Preah Sihanouk": ["sihanouk", "sihanoukville", "preah sihanouk", "ព្រះសីហនុ", "កំពង់សោម", "kompong som", "sihanoukvile"],
+    "Battambang": ["battambang", "បាត់ដំបង", "ក្រុងបាត់ដំបង"],
+    "Kandal": ["kandal", "កណ្តាល", "ខេត្តកណ្តាល", "ta khmau", "តាខ្មៅ"],
+    "Banteay Meanchey": ["banteay meanchey", "បន្ទាយមានជ័យ", "poipet", "ប៉ោយប៉ែត", "sisophon", "សិរីសោភ័ណ"],
+    "Kampong Cham": ["kampong cham", "kompong cham", "កំពង់ចាម"],
+    "Kampong Chhnang": ["kampong chhnang", "kompong chhnang", "កំពង់ឆ្នាំង"],
+    "Kampong Speu": ["kampong speu", "kompong speu", "កំពង់ស្ពឺ"],
+    "Kampong Thom": ["kampong thom", "kompong thom", "កំពង់ធំ"],
+    "Kampot": ["kampot", "កំពត", "ក្រុងកំពត"],
+    "Kep": ["kep", "កែប", "ខេត្តកែប"],
+    "Koh Kong": ["koh kong", "កោះកុង"],
+    "Kratie": ["kratie", "ក្រចេះ"],
+    "Mondulkiri": ["mondulkiri", "មណ្ឌលគិរី", "sen monorom", "សែនមនោរម្យ"],
+    "Oddar Meanchey": ["oddar meanchey", "ឧត្តរមានជ័យ", "samraong", "សំរោង"],
+    "Pailin": ["pailin", "ប៉ៃលិន"],
+    "Preah Vihear": ["preah vihear", "ព្រះវិហារ"],
+    "Prey Veng": ["prey veng", "ព្រៃវែង"],
+    "Pursat": ["pursat", "ពោធិ៍សាត់"],
+    "Ratanakiri": ["ratanakiri", "រតនគិរី", "banlung", "បានលុង"],
+    "Stung Treng": ["stung treng", "ស្ទឹងត្រែង"],
+    "Svay Rieng": ["svay rieng", "ស្វាយរៀង", "bavet", "បាវិត"],
+    "Takeo": ["takeo", "តាកែវ", "doun keo", "ដូនកែវ"],
+    "Tboung Khmum": ["tboung khmum", "ត្បូងឃ្មុំ", "suong", "សួង"],
+}
+
 def _normalize_location(text_lower: str) -> str:
-    """Detect and standardize Cambodian city names from post text."""
-    if "siem reap" in text_lower:
-        return "Siem Reap, Cambodia"
-    if "sihanouk" in text_lower or "sihanoukvile" in text_lower:
-        return "Sihanoukville, Cambodia"
-    if "battambang" in text_lower:
-        return "Battambang, Cambodia"
-    if "kandal" in text_lower:
-        return "Kandal, Cambodia"
-    if "kampot" in text_lower:
-        return "Kampot, Cambodia"
-    if "takeo" in text_lower:
-        return "Takeo, Cambodia"
-    # Default to Phnom Penh for Cambodia-focused channels
+    """
+    Detect and standardize all 25 Cambodian provinces and capital from post text.
+    Supports English variations, Khmer script names, and standard abbreviations.
+    """
+    clean_lower = text_lower.lower()
+    for canonical, variations in CAMBODIA_PROVINCE_REGISTRY.items():
+        for var in variations:
+            # Check for Khmer script (Khmer language is unspaced, so substring check is required)
+            if any('\u1780' <= c <= '\u17ff' for c in var):
+                if var in clean_lower:
+                    return f"{canonical}, Cambodia"
+            elif len(var) <= 3:
+                # Short abbreviations like 'pp', 'sr' require word boundaries
+                if re.search(r'\b' + re.escape(var) + r'\b', clean_lower):
+                    return f"{canonical}, Cambodia"
+            else:
+                # English multi-character provincial names
+                if var in clean_lower:
+                    return f"{canonical}, Cambodia"
+    # Default to Phnom Penh for general Cambodia-focused listings
     return "Phnom Penh, Cambodia"
 
 
-def _parse_salary_from_text(text: str) -> Tuple[Optional[float], Optional[float], bool]:
+def _parse_salary_from_text(text: str) -> Tuple[Optional[float], Optional[float], str, str, bool]:
     """
-    Extract salary range from Telegram or web post text.
-    Returns (salary_min, salary_max, is_negotiable).
-    Handles both English and Khmer patterns:
-      - '300-500$', '300 to 500$', '$300 - $500', '300$ - 500$'
-      - Khmer numerals & text: 'ប្រាក់ខែ: ៣០០ ដល់ ៥០០$', '៣០០ - ៥០០ ដុល្លារ'
-      - 'negotiable', 'competitive', 'ចរចា'
+    Extract structured salary range, currency, and period from post text.
+    Returns: (salary_min, salary_max, salary_currency, salary_period, is_negotiable).
+    Supports:
+      - Currencies: USD ($, usd, ដុល្លារ) and KHR (៛, រៀល, khr)
+      - Numerals: Khmer (០-៩) and Arabic (0-9)
+      - Periods: hourly (/hr, ម៉ោង), daily (/day, ថ្ងៃ), monthly (/month, ខែ), yearly
+      - Ranges: '300-500$', '300 to 500$', '$300 - $500', '៣០០ ដល់ ៥០០$'
+      - Negotiable: 'negotiable', 'competitive', 'ចរចា'
     """
     salary_min = None
     salary_max = None
     text_lower = text.lower()
     is_negotiable = any(w in text_lower for w in ["negotiable", "competitive", "ចរចា"])
 
-    # Translate Khmer numerals (០-៩) to Arabic digits (0-9)
+    # 1. Translate Khmer numerals (០-៩) to Arabic digits (0-9)
     khmer_digits = str.maketrans("០១២៣៤៥៦៧៨៩", "0123456789")
     cleaned = text.translate(khmer_digits)
 
-    # Clean commas inside numbers like 1,200 -> 1200
+    # Clean commas inside numbers like 1,200 -> 1200 or 1,200,000 -> 1200000
+    cleaned = re.sub(r"(\d),(\d)", r"\1\2", cleaned)
     cleaned = re.sub(r"(\d),(\d)", r"\1\2", cleaned)
 
-    # 1. Flexible Range pattern: handles English ('to', '-') and Khmer ('ដល់', '-')
+    # 2. Identify Currency
+    salary_currency = "USD"
+    if any(k in text_lower for k in ["៛", "រៀល", "khr", "riel"]):
+        salary_currency = "KHR"
+    elif any(k in text_lower for k in ["$", "usd", "ដុល្លារ"]):
+        salary_currency = "USD"
+
+    # 3. Identify Salary Period
+    salary_period = "monthly"
+    if re.search(r'(?:/\s*h(?:our|r)?|per\s+hour|hourly|ក្នុងមួយម៉ោង|\bម៉ោង\b)', text_lower):
+        salary_period = "hourly"
+    elif re.search(r'(?:/\s*day|per\s+day|daily|ក្នុងមួយថ្ងៃ|\bថ្ងៃ\b)', text_lower):
+        salary_period = "daily"
+    elif re.search(r'(?:/\s*y(?:ear|r)?|per\s+(?:annum|year)|annually|annual|ក្នុងមួយឆ្នាំ)', text_lower):
+        salary_period = "yearly"
+
+    # 4. Flexible Range pattern: handles USD and KHR amounts
     range_match = re.search(
-        r"(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?\s*(?:[-–—~]|to|ដល់)\s*(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?",
+        r"(?:(?:\$|usd|khr|៛|ដុល្លារ|រៀល)\s*)?(\d{2,9})\s*(?:\$|usd|khr|៛|ដុល្លារ|រៀល)?\s*(?:[-–—~]|to|ដល់)\s*(?:(?:\$|usd|khr|៛|ដុល្លារ|រៀល)\s*)?(\d{2,9})\s*(?:\$|usd|khr|៛|ដុល្លារ|រៀល)?",
         cleaned, re.IGNORECASE
     )
     if range_match:
         full_match = range_match.group(0).lower()
-        if any(c in full_match for c in ["$", "usd", "ដុល្លារ"]) or any(k in text_lower for k in ["salary", "ប្រាក់ខែ", "ប្រាក់បៀវត្ស"]):
+        if any(c in full_match for c in ["$", "usd", "khr", "៛", "ដុល្លារ", "រៀល"]) or any(k in text_lower for k in ["salary", "ប្រាក់ខែ", "ប្រាក់បៀវត្ស"]):
             min_val = float(range_match.group(1))
             max_val = float(range_match.group(2))
             if min_val <= max_val:
-                return min_val, max_val, is_negotiable
+                return min_val, max_val, salary_currency, salary_period, is_negotiable
 
-    # 2. Single number pattern: $500+, 500$, 500 ដុល្លារ, $500/month
+    # 5. Exact Single number pattern (Preserve exact value without artificial inflation)
     single_match = re.search(
-        r"(?:(?:\$|usd|ដុល្លារ)\s*)?(\d{2,5})\s*(?:\$|usd|ដុល្លារ)?(?:\+|/month|/mo|k)?",
+        r"(?:(?:\$|usd|khr|៛|ដុល្លារ|រៀល)\s*)(\d{2,9})|(\d{2,9})\s*(?:\$|usd|khr|៛|ដុល្លារ|រៀល)(?:\+|/month|/mo|k)?",
         cleaned, re.IGNORECASE
     )
     if single_match:
-        full_single = single_match.group(0).lower()
-        if any(c in full_single for c in ["$", "usd", "ដុល្លារ"]) or any(k in text_lower for k in ["salary", "ប្រាក់ខែ", "ប្រាក់បៀវត្ស"]):
-            val = float(single_match.group(1))
-            if val >= 50:  # Avoid matching small numbers like '2 vacancies'
-                salary_min = val
-                salary_max = val * 1.3  # rough upper estimate
-                return salary_min, salary_max, is_negotiable
+        val_str = single_match.group(1) or single_match.group(2)
+        if val_str:
+            val = float(val_str)
+            threshold = 20.0 if salary_currency == "USD" else 50000.0
+            if val >= threshold:
+                return val, val, salary_currency, salary_period, is_negotiable
 
-    return None, None, is_negotiable
+    return None, None, salary_currency, salary_period, is_negotiable
 
 
 def _parse_openings_from_text(text: str) -> int:
@@ -311,7 +363,7 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
         normalized_location = _normalize_location(text_lower)
 
         # --- salary ---
-        salary_min, salary_max, is_negotiable = _parse_salary_from_text(text)
+        salary_min, salary_max, salary_currency, salary_period, is_negotiable = _parse_salary_from_text(text)
 
         # --- openings ---
         openings = _parse_openings_from_text(text)
@@ -334,6 +386,15 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
         now_utc = datetime.now(timezone.utc)
         post_id_str = str(source_post_id or post_url)
 
+        # Automatic Classification for Ingested Telegram Post
+        from app.services.job_classifier import classify_job
+        classification = classify_job(
+            title=title,
+            description=text,
+            company=company,
+            existing_work_arrangement=work_arrangement
+        )
+
         # 1. Save directly into dedicated telegram_jobs table (all 33 fields)
         existing_tg = db.query(TelegramJob).filter(
             TelegramJob.source == channel_handle,
@@ -346,14 +407,16 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
             existing_tg.company = company
             existing_tg.location = location
             existing_tg.normalized_location = normalized_location
-            existing_tg.work_arrangement = work_arrangement
+            existing_tg.work_arrangement = classification.get("work_arrangement", work_arrangement)
             existing_tg.job_type = job_type
-            existing_tg.experience_level = experience_level
+            existing_tg.experience_level = classification.get("job_level", experience_level)
             existing_tg.description = text
             existing_tg.raw_text = text
             existing_tg.language = lang
             existing_tg.salary_min = salary_min
             existing_tg.salary_max = salary_max
+            existing_tg.salary_currency = salary_currency
+            existing_tg.salary_period = salary_period
             existing_tg.is_negotiable = is_negotiable
             existing_tg.deadline = deadline
             existing_tg.application_url = application_url
@@ -369,16 +432,16 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
                 company=company,
                 location=location,
                 normalized_location=normalized_location,
-                work_arrangement=work_arrangement,
+                work_arrangement=classification.get("work_arrangement", work_arrangement),
                 job_type=job_type,
-                experience_level=experience_level,
+                experience_level=classification.get("job_level", experience_level),
                 description=text,
                 raw_text=text,
                 language=lang,
                 salary_min=salary_min,
                 salary_max=salary_max,
-                salary_currency="USD",
-                salary_period="month",
+                salary_currency=salary_currency,
+                salary_period=salary_period,
                 is_negotiable=is_negotiable,
                 posted_at=posted_date,
                 deadline=deadline,
@@ -407,12 +470,12 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
             "company_logo_url": None,
             "location": location,
             "normalized_location": normalized_location,
-            "experience_level": experience_level,
+            "experience_level": classification.get("job_level", experience_level),
             "job_type": job_type,
             "salary_min": salary_min,
             "salary_max": salary_max,
-            "salary_currency": "USD",
-            "salary_period": "monthly",
+            "salary_currency": salary_currency,
+            "salary_period": salary_period,
             "is_negotiable": is_negotiable,
             "openings": openings,
             "description": text,
@@ -423,7 +486,12 @@ def scrape_and_ingest_telegram(db: Session, channel_or_url: str = "internshipsca
             "apply_email": apply_em,
             "apply_phone": apply_ph,
             "apply_telegram": apply_tg,
-            "work_arrangement": work_arrangement,
+            "work_arrangement": classification.get("work_arrangement", work_arrangement),
+            "job_category": classification.get("job_category", "Unknown"),
+            "job_subcategory": classification.get("job_subcategory", "Unknown"),
+            "job_level": classification.get("job_level", "Unknown"),
+            "classification_confidence": classification.get("classification_confidence", 0.7),
+            "classification_source": classification.get("classification_source", "rule"),
             "posted_at": posted_date,
             "deadline": deadline,
         }
@@ -612,10 +680,14 @@ def scrape_and_ingest_web_url(db: Session, web_url: str) -> Dict[str, Any]:
     normalized_location = _normalize_location(page_text_lower)
 
     # Parse salary from text if not extracted from JSON-LD
+    salary_currency = "USD"
+    salary_period = "monthly"
     if salary_min is None and salary_max is None:
-        sal_min, sal_max, sal_neg = _parse_salary_from_text(page_text)
+        sal_min, sal_max, sal_curr, sal_period, sal_neg = _parse_salary_from_text(page_text)
         salary_min = sal_min
         salary_max = sal_max
+        salary_currency = sal_curr
+        salary_period = sal_period
         is_negotiable = sal_neg
 
     # Experience level
@@ -651,7 +723,17 @@ def scrape_and_ingest_web_url(db: Session, web_url: str) -> Dict[str, Any]:
     # Load skills catalog
     all_skills = db.query(Skill).all()
 
+    # Automatic Classification for Ingested Web Post
+    from app.services.job_classifier import classify_job
+    classification = classify_job(
+        title=clean_title,
+        description=description,
+        company=clean_company,
+        existing_work_arrangement=work_arrangement
+    )
+
     # Save to JobListing using dedup_manager
+    posted_at = None
     web_payload = {
         "title": clean_title,
         "raw_title": raw_title[:255] if raw_title else clean_title,
@@ -660,12 +742,12 @@ def scrape_and_ingest_web_url(db: Session, web_url: str) -> Dict[str, Any]:
         "company_logo_url": company_logo_url,
         "location": location,
         "normalized_location": normalized_location,
-        "experience_level": experience_level,
+        "experience_level": classification.get("job_level", experience_level),
         "job_type": job_type,
         "salary_min": salary_min,
         "salary_max": salary_max,
         "salary_currency": salary_currency,
-        "salary_period": "monthly",
+        "salary_period": salary_period,
         "is_negotiable": is_negotiable,
         "openings": openings,
         "description": description,
@@ -673,8 +755,13 @@ def scrape_and_ingest_web_url(db: Session, web_url: str) -> Dict[str, Any]:
         "source_url": clean_url,
         "source_post_id": source_post_id,
         "application_url": clean_url,
-        "work_arrangement": work_arrangement,
-        "posted_at": posted_date,
+        "work_arrangement": classification.get("work_arrangement", work_arrangement),
+        "job_category": classification.get("job_category", "Unknown"),
+        "job_subcategory": classification.get("job_subcategory", "Unknown"),
+        "job_level": classification.get("job_level", "Unknown"),
+        "classification_confidence": classification.get("classification_confidence", 0.7),
+        "classification_source": classification.get("classification_source", "rule"),
+        "posted_at": posted_at or date.today(),
         "deadline": deadline,
     }
     target_job, is_new, dup_of = save_job_with_dedup(db, web_payload)
