@@ -2,9 +2,6 @@
 
 **Document Type:** Formal Capstone Engineering Review & Enhancement Record  
 **Project:** JobMatch Cambodia — AI-Assisted Multi-Source Job Aggregator  
-**Academic Program:** Bachelor of Computer Science — Individual Capstone Project  
-**Author:** RETH CHAN RITH (Student E2)  
-**Academic Advisor:** Sopheak  
 **Status:** Implemented & Verified · **Last Updated:** 2026-11-09  
 
 ---
